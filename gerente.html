@@ -291,20 +291,27 @@ function render(){
       var cardCls=ok?' done-card':'';
       var icon=ok?'✓':'';
       var statusTxt=ok?'<span class="task-status s-done">Completada</span>':'<span class="task-status s-pend">Pendiente</span>';
-      var obsVal=getObs(tdi);
       html+='<div class="task-card'+cardCls+'">';
       html+='<div class="task-hdr" onclick="tog(\''+tk.id+'\','+tdi+')" style="cursor:pointer">';
       html+='<div class="task-check '+cs+'">'+icon+'</div>';
       html+='<div class="task-info"><div class="task-name">'+esc(tk.t)+'</div>';
       html+='<div class="task-resp"><span class="bdg '+tk.rc+'">'+tk.r+'</span></div></div>';
-      html+=statusTxt+'</div>';
-      html+='<div class="obs-box"><div class="obs-lbl">Observación del día</div>';
-      html+='<textarea class="obs-ta" placeholder="Escribe aquí tus observaciones..." onchange="saveObsTxt('+tdi+',this.value)">'+esc(obsVal)+'</textarea>';
-      html+='</div></div>';
+      html+=statusTxt+'</div></div>';
     });
   });
   if(!html)html='<div style="text-align:center;padding:2rem;color:#aaa;font-size:13px">No hay actividades para hoy.</div>';
   document.getElementById('task-list').innerHTML=html;
+
+  // Observación al final
+  var obsVal=getObs(tdi);
+  var obsHtml='<div style="background:#fff;border:0.5px solid #B5D4F4;border-radius:12px;overflow:hidden;margin-top:.875rem">'
+    +'<div style="background:#E6F1FB;padding:.625rem 1rem;border-bottom:1.5px solid #B5D4F4;display:flex;align-items:center;justify-content:space-between">'
+    +'<span style="font-size:12px;font-weight:800;color:#042C53">📝 Observaciones del día — <span style="color:#185FA5">'+cur+'</span></span>'
+    +'<span style="font-size:11px;color:#185FA5">'+DIAS[tdi]+'</span></div>'
+    +'<div style="padding:.875rem">'
+    +'<textarea style="width:100%;font-family:inherit;font-size:13px;color:#1a1a1a;background:#f8f8f8;border:0.5px solid #ddd;border-radius:8px;padding:10px 12px;resize:vertical;min-height:80px;font-weight:500" placeholder="Escribe aquí tus observaciones del día..." onchange="saveObsTxt('+tdi+',this.value)">'+esc(obsVal)+'</textarea>'
+    +'</div></div>';
+  document.getElementById('task-list').innerHTML+=obsHtml;
 }
 
 var saved=localStorage.getItem('gerente-tienda');

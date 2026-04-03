@@ -75,22 +75,16 @@ body{font-family:system-ui,sans-serif;font-size:15px;font-weight:500;background:
     <button class="sync-btn" onclick="syncNow()">↻ Actualizar</button>
   </div>
   <div id="semana-box" class="semana-box" style="display:none">
-    <div class="semana-title">Resumen semanal — <span id="sem-store"></span></div>
     <div class="semana-mets">
-      <div class="s-met"><div class="s-mv" id="sem-tot">0</div><div class="s-ml">Total semana</div></div>
-      <div class="s-met ok"><div class="s-mv" id="sem-ok">0</div><div class="s-ml">✓ Completadas</div></div>
-      <div class="s-met pend"><div class="s-mv" id="sem-pend">0</div><div class="s-ml">⏳ Pendientes</div></div>
+      <div class="s-met tot"><div class="s-mv tot" id="sem-tot">0</div><div class="s-ml">Total semana</div></div>
+      <div class="s-met ok"><div class="s-mv ok" id="sem-ok">0</div><div class="s-ml">✓ Completadas</div></div>
+      <div class="s-met pend"><div class="s-mv pend" id="sem-pend">0</div><div class="s-ml">⏳ Pendientes</div></div>
     </div>
     <div class="semana-prog">
-      <div class="semana-prog-top"><span>Cumplimiento semanal</span><span id="sem-pct"></span></div>
+      <div class="semana-prog-top"><span>Cumplimiento semanal — <b id="sem-store"></b></span><span id="sem-pct"></span></div>
       <div class="semana-prog-bar"><div class="semana-prog-fill" id="sem-fill"></div></div>
-      <div class="hoy-label"><span>Cumplimiento hoy</span><span id="hoy-pct"></span></div>
-      <div class="hoy-bar"><div class="hoy-fill" id="hoy-fill"></div></div>
     </div>
-    <div class="dias-wrap">
-      <div class="dias-title">Acumulado por día</div>
-      <div class="dias-grid" id="dias-grid"></div>
-    </div>
+    <div class="dias-wrap" id="dias-grid"></div>
   </div>
 
   <div class="fecha-bar">
@@ -251,13 +245,9 @@ function render(){
   document.getElementById('sem-tot').textContent=semTot;
   document.getElementById('sem-ok').textContent=semOk;
   document.getElementById('sem-pend').textContent=semPend;
-  document.getElementById('sem-pct').textContent=semP+'%';
+  document.getElementById('sem-pct').innerHTML='<b>'+semOk+'</b>/'+semTot+' <span class="pill '+pc(semP)+'">'+semP+'%</span>';
   document.getElementById('sem-fill').style.cssText='width:'+semP+'%;background:'+pcol(semP);
-  var hoyP=tot?Math.round(dn/tot*100):0;
-  document.getElementById('hoy-pct').textContent=dn+'/'+tot+' — '+hoyP+'%';
-  document.getElementById('hoy-fill').style.cssText='width:'+hoyP+'%;background:rgba(255,255,255,.8)';
 
-  // Acumulado por día
   var diasNames=['L','M','X','J','V','S','D'];
   var diasHtml='';
   for(var di=0;di<7;di++){
@@ -266,12 +256,12 @@ function render(){
     diTasks.forEach(function(tk){if(done(tk.id,di))diOk++;});
     var diP=diTot?Math.round(diOk/diTot*100):0;
     var isHoy=di===tdi,isFut=di>tdi;
-    var barCol=isHoy?'rgba(255,255,255,.9)':diP>=85?'#1D9E75':diP>=60?'#EF9F27':diP>0?'#E24B4A':'rgba(255,255,255,.3)';
+    var barCol=isHoy?'#C0392B':diP>=85?'#1D9E75':diP>=60?'#EF9F27':diP>0?'#E24B4A':'#D3D1C7';
     var colCls=isHoy?' hoy-col':isFut?' fut-col':'';
     diasHtml+='<div class="dia-col'+colCls+'">';
     diasHtml+='<span class="dia-name'+(isHoy?' hoy-d':'')+'">'+diasNames[di]+'</span>';
-    diasHtml+='<div class="dia-bar-wrap"><div class="dia-bar-fill" style="height:'+diP+'%;background:'+barCol+'"></div></div>';
-    diasHtml+='<span class="dia-pct'+(isHoy?' hoy-d':'')+'">'+(isFut&&!isHoy?'—':diP+'%')+'</span>';
+    diasHtml+='<div class="dia-outer"><div class="dia-inner" style="height:'+diP+'%;background:'+barCol+'"></div></div>';
+    diasHtml+='<span class="dia-pct'+(isHoy?' hoy-d':'')+'">'+(isFut?'—':diP+'%')+'</span>';
     diasHtml+='</div>';
   }
   document.getElementById('dias-grid').innerHTML=diasHtml;

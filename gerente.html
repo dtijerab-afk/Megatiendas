@@ -74,6 +74,19 @@ body{font-family:system-ui,sans-serif;font-size:15px;font-weight:500;background:
     </div>
     <button class="sync-btn" onclick="syncNow()">↻ Actualizar</button>
   </div>
+  <div id="semana-box" class="semana-box" style="display:none">
+    <div class="semana-title">Resumen semanal — <span id="sem-store"></span></div>
+    <div class="semana-mets">
+      <div class="s-met" style="border-left:3px solid #185FA5"><div class="s-mv" style="color:#185FA5" id="sem-tot">0</div><div class="s-ml">Total semana</div></div>
+      <div class="s-met" style="border-left:3px solid #1D9E75"><div class="s-mv" style="color:#1D9E75" id="sem-ok">0</div><div class="s-ml">Completadas</div></div>
+      <div class="s-met" style="border-left:3px solid #E24B4A"><div class="s-mv" style="color:#E24B4A" id="sem-pend">0</div><div class="s-ml">Pendientes</div></div>
+    </div>
+    <div class="semana-prog">
+      <div class="semana-prog-top"><span>Cumplimiento semanal</span><span id="sem-pct"></span></div>
+      <div class="semana-prog-bar"><div class="semana-prog-fill" id="sem-fill"></div></div>
+    </div>
+  </div>
+
   <div class="fecha-bar">
     <span class="fecha-txt" id="fecha-txt"></span>
     <span class="dia-txt" id="dia-txt"></span>
@@ -133,7 +146,23 @@ var TASKS=[
   {id:'t27',g:'Coordinadores',t:'Lavado a fondo recibo',r:'Coordinadores',rc:'rk',d:[5,6]}
 ];
 var GROUPS=['Administrativo','Comercial','Principal','Caja','Coordinadores'];
-var cur='',checks={};
+var cur='',checks={},obsData={};
+
+function obsKey(di){return cur+'|'+wkKey()+'|day|'+di;}
+function getObs(di){return obsData[obsKey(di)]||'';}
+function saveObsTxt(di,val){
+  obsData[obsKey(di)]=val;
+  try{localStorage.setItem('gerente-obs-'+cur,JSON.stringify(obsData));}catch(e){}
+  sbSaveObs(di,val);
+}
+async function sbSaveObs(di,val){
+  try{
+    await fetch(SB_URL+'/rest/v1/observations?obs_key=eq.'+encodeURIComponent(obsKey(di)),{method:'DELETE',headers:sbH()});
+    if(val.trim()){
+      await fetch(SB_URL+'/rest/v1/observations',{method:'POST',headers:sbH(),body:JSON.stringify([{obs_key:obsKey(di),obs_id:String(di),date:DIAS[di]||'',text:val}])});
+    }
+  }catch(e){}
+}
 
 function getMon(){var n=new Date(),dy=n.getDay(),diff=dy===0?-6:1-dy,m=new Date(n);m.setDate(n.getDate()+diff);m.setHours(0,0,0,0);return m;}
 function wkKey(){return getMon().toISOString().slice(0,10);}
@@ -161,8 +190,14 @@ async function loadChecks(){
     var rows=await res.json();
     checks={};
     rows.forEach(function(r){checks[r.store+'|'+r.week+'|'+r.task_id+'|'+r.day_idx]=true;});
+    var r2=await fetch(SB_URL+'/rest/v1/observations?select=*&obs_key=like.'+encodeURIComponent(cur+'|'+wkKey()+'|day|')+'*',{headers:sbH()});
+    var orows=await r2.json();
+    orows.forEach(function(r){obsData[r.obs_key]=r.text;});
     setStatus('ok');
-  }catch(e){setStatus('err');}
+  }catch(e){
+    try{var v=localStorage.getItem('gerente-obs-'+cur);if(v)obsData=JSON.parse(v);}catch(e2){}
+    setStatus('err');
+  }
   render();
 }
 
@@ -198,17 +233,33 @@ function render(){
   var meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
   document.getElementById('fecha-txt').textContent=now.getDate()+' de '+meses[now.getMonth()]+' de '+now.getFullYear();
   document.getElementById('dia-txt').textContent=DIAS[tdi]||'—';
+
+  // Resumen semanal
+  var allD=[0,1,2,3,4,5,6];
+  var semTot=0,semOk=0;
+  TASKS.forEach(function(tk){allD.forEach(function(di){if(tk.d.indexOf(di)>=0){semTot++;if(done(tk.id,di))semOk++;}});});
+  var semPend=semTot-semOk;
+  var semP=semTot?Math.round(semOk/semTot*100):0;
+  document.getElementById('semana-box').style.display='';
+  document.getElementById('sem-store').textContent=cur;
+  document.getElementById('sem-tot').textContent=semTot;
+  document.getElementById('sem-ok').textContent=semOk;
+  document.getElementById('sem-pend').textContent=semPend;
+  document.getElementById('sem-pct').innerHTML='<b>'+semOk+'</b>/'+semTot+' <span class="pill '+pc(semP)+'">'+semP+'%</span>';
+  document.getElementById('sem-fill').style.cssText='width:'+semP+'%;background:'+pcol(semP);
+
   var todayTasks=TASKS.filter(function(tk){return tk.d.indexOf(tdi)>=0;});
   var tot=todayTasks.length,dn=0;
   todayTasks.forEach(function(tk){if(done(tk.id,tdi))dn++;});
   var p=tot?Math.round(dn/tot*100):0;
   document.getElementById('prog-fill').style.cssText='width:'+p+'%;background:'+pcol(p);
   document.getElementById('prog-val').innerHTML='<b>'+dn+'</b>/'+tot+' <span class="pill '+pc(p)+'">'+p+'%</span>';
-  document.getElementById('prog-lbl').textContent='Cumplimiento — '+cur;
+  document.getElementById('prog-lbl').textContent='Cumplimiento hoy — '+cur;
   var remPend=document.getElementById('rem-pend'),remDone=document.getElementById('rem-done');
   if(tot>0&&dn===tot){remPend.classList.add('hide');remDone.classList.remove('hide');}
   else if(tot>0&&dn<tot){remPend.classList.remove('hide');remDone.classList.add('hide');}
   else{remPend.classList.add('hide');remDone.classList.add('hide');}
+
   var html='';
   GROUPS.forEach(function(g){
     var gt=TASKS.filter(function(tk){return tk.g===g&&tk.d.indexOf(tdi)>=0;});
@@ -222,12 +273,16 @@ function render(){
       var cardCls=ok?' done-card':'';
       var icon=ok?'✓':'';
       var statusTxt=ok?'<span class="task-status s-done">Completada</span>':'<span class="task-status s-pend">Pendiente</span>';
+      var obsVal=getObs(tdi);
       html+='<div class="task-card'+cardCls+'">';
       html+='<div class="task-hdr" onclick="tog(\''+tk.id+'\','+tdi+')" style="cursor:pointer">';
       html+='<div class="task-check '+cs+'">'+icon+'</div>';
       html+='<div class="task-info"><div class="task-name">'+esc(tk.t)+'</div>';
       html+='<div class="task-resp"><span class="bdg '+tk.rc+'">'+tk.r+'</span></div></div>';
-      html+=statusTxt+'</div></div>';
+      html+=statusTxt+'</div>';
+      html+='<div class="obs-box"><div class="obs-lbl">Observación del día</div>';
+      html+='<textarea class="obs-ta" placeholder="Escribe aquí tus observaciones..." onchange="saveObsTxt('+tdi+',this.value)">'+esc(obsVal)+'</textarea>';
+      html+='</div></div>';
     });
   });
   if(!html)html='<div style="text-align:center;padding:2rem;color:#aaa;font-size:13px">No hay actividades para hoy.</div>';

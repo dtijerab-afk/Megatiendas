@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -138,7 +137,6 @@ tfoot td:first-child{text-align:left;padding-left:12px;color:#042C53;font-size:1
 <div class="app">
 
 <!-- DESKTOP -->
-
 <div class="dk-view">
   <div class="cfg-bar">
     <div class="cfg-status">
@@ -210,7 +208,6 @@ tfoot td:first-child{text-align:left;padding-left:12px;color:#042C53;font-size:1
 </div>
 
 <!-- MÓVIL -->
-
 <div class="mv-view">
   <div class="mv-top">
     <select class="mv-sel" id="msel" onchange="setStore(this.value)">
@@ -247,7 +244,6 @@ tfoot td:first-child{text-align:left;padding-left:12px;color:#042C53;font-size:1
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-
 <script>
 var SB_URL='https://mcomfkhvhyznbtbhwpvs.supabase.co';
 var SB_KEY='sb_publishable_kh7LGnZ1CEwvybXBWP2fMg_Pf07MZZM';
@@ -423,27 +419,26 @@ function renderObs(){var arr=getObs();var em='<div class="obs-em">Sin observacio
 
 function dCH(id){if(CHS[id]){CHS[id].destroy();delete CHS[id];}}
 function renderSum(){
-var w=wkKey(),tdi=todayDi(),con=document.getElementById(‘acon’);if(!con)return;
-if(sTab===0){var vals=STORES.map(function(s){return pct(s,w,TASKS,AD)||0;});con.innerHTML=’<div style="position:relative;height:185px"><canvas id="ch0"></canvas></div><div class="leg">’+STORES.map(function(s,i){return’<span class="li"><span class="ls" style="background:'+SCOL[s]+'"></span>’+s+’: <b>’+vals[i]+’%</b></span>’;}).join(’’)+’</div>’;dCH(‘ch0’);CHS[‘ch0’]=new Chart(document.getElementById(‘ch0’),{type:‘bar’,data:{labels:STORES.map(function(s){return s.split(’ ‘)[0];}),datasets:[{data:vals,backgroundColor:STORES.map(function(s){return SCOL[s];}),borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:function(v){return v+’%’;},font:{size:10}},grid:{color:‘rgba(0,0,0,.05)’}},x:{grid:{display:false},ticks:{font:{size:9}}}},plugins:{legend:{display:false}}}});}
-else if(sTab===1){var resps=[‘Ambos’,‘Comercial’,‘Principal’,‘Sup caja’,‘Coordinadores’];var vals2=resps.map(function(r){return pct(cur,w,TASKS.filter(function(tk){return tk.r===r;}),AD)||0;});con.innerHTML=’<div style="position:relative;height:185px"><canvas id="ch1"></canvas></div>’;dCH(‘ch1’);CHS[‘ch1’]=new Chart(document.getElementById(‘ch1’),{type:‘bar’,data:{labels:resps,datasets:[{data:vals2,backgroundColor:[’#85B7EB’,’#FAC775’,’#AFA9EC’,’#9FE1CB’,’#F09595’],borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:‘y’,scales:{x:{min:0,max:100,ticks:{callback:function(v){return v+’%’;},font:{size:10}},grid:{color:‘rgba(0,0,0,.05)’}},y:{grid:{display:false},ticks:{font:{size:11}}}},plugins:{legend:{display:false}}}});}
-else if(sTab===2){var vals3=AD.map(function(di){return(tdi>=0&&di<=tdi)?(pct(cur,w,TASKS,[di])||0):null;});var bgs=vals3.map(function(v){return v===null?‘rgba(12,68,124,.1)’:v>=85?’#1D9E75’:v>=60?’#EF9F27’:’#E24B4A’;});con.innerHTML=’<div style="position:relative;height:185px"><canvas id="ch2"></canvas></div><div class="leg"><span class="li"><span class="ls" style="background:#1D9E75"></span>≥85%</span><span class="li"><span class="ls" style="background:#EF9F27"></span>60-84%</span><span class="li"><span class="ls" style="background:#E24B4A"></span><60%</span></div>’;dCH(‘ch2’);CHS[‘ch2’]=new Chart(document.getElementById(‘ch2’),{type:‘bar’,data:{labels:DSS,datasets:[{data:vals3.map(function(v){return v||0;}),backgroundColor:bgs,borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:function(v){return v+’%’;},font:{size:10}},grid:{color:‘rgba(0,0,0,.05)’}},x:{grid:{display:false},ticks:{font:{size:10},autoSkip:false}}},plugins:{legend:{display:false}}}});}
-else{var weeks=Array.from({length:8},function(_,i){var off=wkOff-(7-i),m=getMon(off),s=new Date(m);s.setDate(m.getDate()+6);return{label:fmt(m),wk:getMon(off).toISOString().slice(0,10)};});con.innerHTML=’<div style="position:relative;height:200px"><canvas id="ch3"></canvas></div><div class="leg">’+STORES.map(function(s){return’<span class="li"><span class="ls" style="background:'+SCOL[s]+'"></span>’+s+’</span>’;}).join(’’)+’</div>’;dCH(‘ch3’);CHS[‘ch3’]=new Chart(document.getElementById(‘ch3’),{type:‘line’,data:{labels:weeks.map(function(wk){return wk.label;}),datasets:STORES.map(function(s){return{label:s,data:weeks.map(function(wk){return pct(s,wk.wk,TASKS,AD);}),borderColor:SCOL[s],backgroundColor:SCOL[s]+‘18’,tension:.35,pointRadius:3,borderWidth:2,fill:false,spanGaps:true};})},options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:function(v){return v+’%’;},font:{size:10}},grid:{color:‘rgba(0,0,0,.05)’}},x:{grid:{display:false},ticks:{font:{size:9},maxRotation:30}}},plugins:{legend:{display:false}}}});}
+  var w=wkKey(),tdi=todayDi(),con=document.getElementById('acon');if(!con)return;
+  if(sTab===0){var vals=STORES.map(function(s){return pct(s,w,TASKS,AD)||0;});con.innerHTML='<div style="position:relative;height:185px"><canvas id="ch0"></canvas></div><div class="leg">'+STORES.map(function(s,i){return'<span class="li"><span class="ls" style="background:'+SCOL[s]+'"></span>'+s+': <b>'+vals[i]+'%</b></span>';}).join('')+'</div>';dCH('ch0');CHS['ch0']=new Chart(document.getElementById('ch0'),{type:'bar',data:{labels:STORES.map(function(s){return s.split(' ')[0];}),datasets:[{data:vals,backgroundColor:STORES.map(function(s){return SCOL[s];}),borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:function(v){return v+'%';},font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}},x:{grid:{display:false},ticks:{font:{size:9}}}},plugins:{legend:{display:false}}}});}
+  else if(sTab===1){var resps=['Ambos','Comercial','Principal','Sup caja','Coordinadores'];var vals2=resps.map(function(r){return pct(cur,w,TASKS.filter(function(tk){return tk.r===r;}),AD)||0;});con.innerHTML='<div style="position:relative;height:185px"><canvas id="ch1"></canvas></div>';dCH('ch1');CHS['ch1']=new Chart(document.getElementById('ch1'),{type:'bar',data:{labels:resps,datasets:[{data:vals2,backgroundColor:['#85B7EB','#FAC775','#AFA9EC','#9FE1CB','#F09595'],borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{min:0,max:100,ticks:{callback:function(v){return v+'%';},font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}},y:{grid:{display:false},ticks:{font:{size:11}}}},plugins:{legend:{display:false}}}});}
+  else if(sTab===2){var vals3=AD.map(function(di){return(tdi>=0&&di<=tdi)?(pct(cur,w,TASKS,[di])||0):null;});var bgs=vals3.map(function(v){return v===null?'rgba(12,68,124,.1)':v>=85?'#1D9E75':v>=60?'#EF9F27':'#E24B4A';});con.innerHTML='<div style="position:relative;height:185px"><canvas id="ch2"></canvas></div><div class="leg"><span class="li"><span class="ls" style="background:#1D9E75"></span>≥85%</span><span class="li"><span class="ls" style="background:#EF9F27"></span>60-84%</span><span class="li"><span class="ls" style="background:#E24B4A"></span>&lt;60%</span></div>';dCH('ch2');CHS['ch2']=new Chart(document.getElementById('ch2'),{type:'bar',data:{labels:DSS,datasets:[{data:vals3.map(function(v){return v||0;}),backgroundColor:bgs,borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:function(v){return v+'%';},font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}},x:{grid:{display:false},ticks:{font:{size:10},autoSkip:false}}},plugins:{legend:{display:false}}}});}
+  else{var weeks=Array.from({length:8},function(_,i){var off=wkOff-(7-i),m=getMon(off),s=new Date(m);s.setDate(m.getDate()+6);return{label:fmt(m),wk:getMon(off).toISOString().slice(0,10)};});con.innerHTML='<div style="position:relative;height:200px"><canvas id="ch3"></canvas></div><div class="leg">'+STORES.map(function(s){return'<span class="li"><span class="ls" style="background:'+SCOL[s]+'"></span>'+s+'</span>';}).join('')+'</div>';dCH('ch3');CHS['ch3']=new Chart(document.getElementById('ch3'),{type:'line',data:{labels:weeks.map(function(wk){return wk.label;}),datasets:STORES.map(function(s){return{label:s,data:weeks.map(function(wk){return pct(s,wk.wk,TASKS,AD);}),borderColor:SCOL[s],backgroundColor:SCOL[s]+'18',tension:.35,pointRadius:3,borderWidth:2,fill:false,spanGaps:true};})},options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:function(v){return v+'%';},font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}},x:{grid:{display:false},ticks:{font:{size:9},maxRotation:30}}},plugins:{legend:{display:false}}}});}
 }
 
 function getPendingToday(){var w=wkKey(),tdi=todayDi();if(tdi<0)return[];return TASKS.filter(function(tk){return tk.d.indexOf(tdi)>=0&&!done(cur,w,tk.id,tdi);});}
-function updateNextLabel(){var el=document.getElementById(‘next-rem’);if(!el)return;var t=new Date(nextRemTime),hh=t.getHours(),mm=t.getMinutes();el.textContent=(hh<10?‘0’:’’)+hh+’:’+(mm<10?‘0’:’’)+mm;}
-function triggerReminder(){var pending=getPendingToday(),rb=document.getElementById(‘rembar’),rs=document.getElementById(‘rem-store’),rsum=document.getElementById(‘rem-summary’);if(rb)rb.classList.remove(‘hide’);if(rs)rs.textContent=cur;var tdi=todayDi(),day=[‘Lunes’,‘Martes’,‘Miércoles’,‘Jueves’,‘Viernes’,‘Sábado’,‘Domingo’][tdi]||‘hoy’;if(rsum)rsum.innerHTML=pending.length>0?‘Estimado usuario, le recuerdo que debe marcar <b>’+pending.length+’ actividad(es)</b> programadas para <b>’+day+’</b>.’:‘✅ ¡Todas las actividades de hoy están completadas!’;nextRemTime=Date.now()+REM_INTERVAL;updateNextLabel();}
-function dismissReminder(){var rb=document.getElementById(‘rembar’);if(rb)rb.classList.add(‘hide’);nextRemTime=Date.now()+REM_INTERVAL;updateNextLabel();}
+function updateNextLabel(){var el=document.getElementById('next-rem');if(!el)return;var t=new Date(nextRemTime),hh=t.getHours(),mm=t.getMinutes();el.textContent=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;}
+function triggerReminder(){var pending=getPendingToday(),rb=document.getElementById('rembar'),rs=document.getElementById('rem-store'),rsum=document.getElementById('rem-summary');if(rb)rb.classList.remove('hide');if(rs)rs.textContent=cur;var tdi=todayDi(),day=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'][tdi]||'hoy';if(rsum)rsum.innerHTML=pending.length>0?'Estimado usuario, le recuerdo que debe marcar <b>'+pending.length+' actividad(es)</b> programadas para <b>'+day+'</b>.':'✅ ¡Todas las actividades de hoy están completadas!';nextRemTime=Date.now()+REM_INTERVAL;updateNextLabel();}
+function dismissReminder(){var rb=document.getElementById('rembar');if(rb)rb.classList.add('hide');nextRemTime=Date.now()+REM_INTERVAL;updateNextLabel();}
 function startReminderLoop(){setInterval(function(){if(Date.now()>=nextRemTime)triggerReminder();},60000);updateNextLabel();}
-function resetWk(){if(!confirm(’¿Limpiar registros de esta semana para ‘+cur+’?’))return;var pfx=cur+’|’+wkKey()+’|’;Object.keys(checks).forEach(function(k){if(k.indexOf(pfx)===0)delete checks[k];});sbReset(cur,wkKey());render();}
-function doExport(){var w=wkKey();var rows=[[‘Tienda’,‘Grupo’,‘Tarea’,‘Responsable’].concat(DSS).concat([’%’]).join(’,’)];TASKS.forEach(function(tk){var days=AD.map(function(i){return tk.d.indexOf(i)>=0?(done(cur,w,tk.id,i)?‘OK’:‘Pendiente’):‘N/A’;});var p2=pct(cur,w,[tk],AD);rows.push([cur,’”’+tk.g+’”’,’”’+tk.t+’”’,tk.r].concat(days).concat([p2!==null?p2+’%’:’—’]).join(’,’));});var a=document.createElement(‘a’);a.href=URL.createObjectURL(new Blob([rows.join(’\n’)],{type:‘text/csv;charset=utf-8;’}));a.download=‘seguimiento-’+cur+’-’+wkKey()+’.csv’;a.click();}
+function resetWk(){if(!confirm('¿Limpiar registros de esta semana para '+cur+'?'))return;var pfx=cur+'|'+wkKey()+'|';Object.keys(checks).forEach(function(k){if(k.indexOf(pfx)===0)delete checks[k];});sbReset(cur,wkKey());render();}
+function doExport(){var w=wkKey();var rows=[['Tienda','Grupo','Tarea','Responsable'].concat(DSS).concat(['%']).join(',')];TASKS.forEach(function(tk){var days=AD.map(function(i){return tk.d.indexOf(i)>=0?(done(cur,w,tk.id,i)?'OK':'Pendiente'):'N/A';});var p2=pct(cur,w,[tk],AD);rows.push([cur,'"'+tk.g+'"','"'+tk.t+'"',tk.r].concat(days).concat([p2!==null?p2+'%':'—']).join(','));});var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8;'}));a.download='seguimiento-'+cur+'-'+wkKey()+'.csv';a.click();}
 
 async function init(){
-await sbLoad();render();startReminderLoop();
-setInterval(function(){sbLoad().then(function(){render();});},30000);
+  await sbLoad();render();startReminderLoop();
+  setInterval(function(){sbLoad().then(function(){render();});},30000);
 }
 init();
 </script>
-
 </body>
 </html>

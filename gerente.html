@@ -3,379 +3,316 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Seguimiento Diario — Megatiendas</title>
+<title>Vista Gerente — Megatiendas</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,sans-serif;font-size:15px;font-weight:500;background:#f0f4f8;color:#1a1a1a;min-height:100vh}
-.app{max-width:600px;margin:0 auto;padding:.75rem 1rem 3rem}
+body{font-family:system-ui,sans-serif;background:#f0f4f8;color:#1a1a1a;min-height:100vh}
+.wrap{max-width:560px;margin:0 auto;padding:.75rem 1rem 3rem}
 
 /* HEADER */
-.hdr{background:linear-gradient(135deg,#042C53,#0C447C);border-radius:14px;padding:1rem 1.25rem;margin-bottom:1rem;text-align:center}
-.hdr h1{font-size:16px;font-weight:700;color:#fff;margin-bottom:.5rem}
-.hdr-sub{font-size:12px;color:#B5D4F4}
-.store-sel{font-family:inherit;font-size:15px;font-weight:700;color:#fff;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);border-radius:10px;padding:8px 14px;cursor:pointer;width:100%;margin-top:.625rem}
-.store-sel option{color:#042C53;background:#fff}
+.hdr{background:linear-gradient(135deg,#042C53,#0C447C);border-radius:14px;padding:1rem 1.1rem 1.1rem;margin-bottom:.875rem}
+.hdr-brand{font-size:11px;font-weight:700;color:#B5D4F4;margin-bottom:.625rem;letter-spacing:.5px}
+.hdr-title{font-size:18px;font-weight:800;color:#fff;margin-bottom:.875rem;line-height:1.2}
+
+/* ZONA PILLS */
+.zona-row{display:flex;gap:6px;margin-bottom:.75rem;flex-wrap:wrap}
+.zbtn{font-family:inherit;font-size:12px;font-weight:700;color:rgba(255,255,255,.7);background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);border-radius:20px;padding:6px 14px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.zbtn.on{color:#fff;background:rgba(255,255,255,.22);border-color:#fff}
+.zbtn:hover{background:rgba(255,255,255,.15)}
+
+/* STORE SELECT */
+.store-sel-wrap{position:relative}
+.store-sel-lbl{font-size:10px;font-weight:800;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.store-sel{font-family:inherit;font-size:14px;font-weight:700;color:#fff;background:rgba(255,255,255,.13);border:1.5px solid rgba(255,255,255,.3);border-radius:10px;padding:8px 14px;cursor:pointer;width:100%;appearance:none;-webkit-appearance:none}
+.store-sel option{color:#042C53;background:#fff;font-weight:600}
 
 /* STATUS */
-.status-bar{display:flex;align-items:center;justify-content:space-between;padding:.5rem .875rem;background:#fff;border-radius:10px;margin-bottom:.875rem;border:0.5px solid #ddd;flex-wrap:wrap;gap:8px}
-.dot{width:9px;height:9px;border-radius:50%}
-.dot-ok{background:#1D9E75}.dot-sync{background:#EF9F27;animation:blink 1s infinite}.dot-err{background:#E24B4A}.dot-off{background:#aaa}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.status-txt{font-size:11px;color:#888;display:flex;align-items:center;gap:6px}
-.sync-btn{padding:5px 11px;border-radius:7px;border:0.5px solid #185FA5;background:none;color:#185FA5;cursor:pointer;font-size:11px;font-family:inherit;font-weight:600}
+.status-row{display:flex;align-items:center;gap:7px;margin-top:.625rem}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.status-txt{font-size:11px;color:rgba(255,255,255,.55);flex:1}
+.sync-btn{font-family:inherit;font-size:11px;font-weight:700;color:rgba(255,255,255,.75);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:4px 10px;cursor:pointer}
+.sync-btn:hover{background:rgba(255,255,255,.2)}
 
-/* RESUMEN SEMANAL */
-.semana-box{background:#fff;border:0.5px solid #B5D4F4;border-radius:12px;padding:.875rem 1rem;margin-bottom:.875rem}
-.semana-mets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:.75rem}
-.s-met{border-radius:10px;padding:10px 10px 8px;text-align:center}
-.s-met-tot{background:#E6F1FB;border-left:4px solid #185FA5}
-.s-met-ok{background:#E1F5EE;border-left:4px solid #1D9E75}
-.s-met-pend{background:#FCEBEB;border-left:4px solid #E24B4A}
-.s-mv-tot{font-size:26px;font-weight:800;color:#185FA5}
-.s-mv-ok{font-size:26px;font-weight:800;color:#0F6E56}
-.s-mv-pend{font-size:26px;font-weight:800;color:#A32D2D}
-.s-ml{font-size:9px;color:#888;font-weight:600;margin-top:2px}
-.sem-prog-wrap{margin-bottom:.625rem}
-.sem-prog-top{display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:4px;font-weight:600}
-.sem-prog-bar{height:7px;border-radius:4px;background:#E6F1FB;overflow:hidden}
-.sem-prog-fill{height:100%;border-radius:4px;transition:width .5s,background .5s}
+/* TODAY INFO */
+.today-card{background:#fff;border-radius:12px;padding:.875rem 1rem;margin-bottom:.875rem;border:1px solid #dde6f0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.today-date{font-size:22px;font-weight:800;color:#042C53}
+.today-day{font-size:11px;color:#888;font-weight:600;margin-top:2px}
+.today-pct-wrap{text-align:right}
+.today-pct{font-size:28px;font-weight:800}
+.today-pct-lbl{font-size:10px;color:#888;font-weight:600}
+.today-bar{height:6px;border-radius:3px;background:#E6F1FB;overflow:hidden;margin-top:8px}
+.today-bar-fill{height:100%;border-radius:3px;transition:width .4s,background .4s}
 
-/* BARRAS POR DÍA */
-.dias-wrap{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.dia-col{display:flex;flex-direction:column;align-items:center;gap:2px}
-.dia-name{font-size:9px;font-weight:800;color:#185FA5;text-align:center}
-.dia-name.hoy-d{color:#C0392B}
-.dia-outer{width:100%;height:36px;background:#f0f4f8;border-radius:5px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
-.dia-inner{width:100%;border-radius:5px;transition:height .4s}
-.dia-col.hoy-col .dia-outer{outline:2px solid #C0392B;border-radius:5px}
-.dia-col.fut-col{opacity:.4}
-.dia-pct{font-size:8px;font-weight:700;color:#888;text-align:center}
-.dia-pct.hoy-d{color:#C0392B}
-
-/* FECHA */
-.fecha-bar{background:#fff;border-radius:10px;padding:.625rem 1rem;margin-bottom:.875rem;border:0.5px solid #ddd;display:flex;align-items:center;justify-content:space-between}
-.fecha-txt{font-size:13px;font-weight:700;color:#042C53}
-.dia-txt{font-size:12px;color:#185FA5;font-weight:600}
-
-/* PROGRESO HOY */
-.prog-wrap{margin-bottom:.875rem}
-.prog-top{display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:5px}
-.prog-bar{height:10px;border-radius:5px;background:#E6F1FB;overflow:hidden}
-.prog-fill{height:100%;border-radius:5px;transition:width .4s,background .4s}
-
-/* PILLS */
-.pill{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+/* TASK GROUPS */
+.grp-hdr{font-size:10px;font-weight:800;color:#042C53;text-transform:uppercase;letter-spacing:.6px;padding:10px 0 5px;display:flex;align-items:center;justify-content:space-between}
+.grp-pct{font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px}
 .pg{background:#E1F5EE;color:#0F6E56}.pa{background:#FAEEDA;color:#854F0B}.pr{background:#FCEBEB;color:#A32D2D}.pn{background:#f0f0f0;color:#888}
 
-/* GRUPOS */
-.grp-hdr{font-size:10px;font-weight:800;color:#042C53;text-transform:uppercase;letter-spacing:.5px;padding:10px 4px 4px;display:flex;align-items:center;justify-content:space-between}
-
-/* TARJETAS */
-.task-card{background:#fff;border:0.5px solid #ddd;border-radius:12px;margin-bottom:8px;overflow:hidden}
-.task-card.done-card{border-color:#1D9E75;background:#f6fffc}
-.task-hdr{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer}
-.task-check{width:32px;height:32px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;user-select:none}
-.task-check:active{transform:scale(.85)}
-.cg{background:#D3D1C7;color:#5F5E5A}.cg:hover{background:#B4B2A9}
-.cv{background:#1D9E75;color:#fff;box-shadow:0 2px 6px rgba(29,158,117,.3)}.cv:hover{opacity:.82}
-.task-info{flex:1}
+/* TASK CARD */
+.task-card{background:#fff;border-radius:11px;border:1px solid #e5ecf4;margin-bottom:6px;display:flex;align-items:center;gap:10px;padding:10px 12px;transition:border-color .15s,box-shadow .15s;cursor:pointer;user-select:none}
+.task-card:hover{border-color:#B5D4F4;box-shadow:0 2px 8px rgba(12,68,124,.07)}
+.task-card.done{background:#F4FBF8;border-color:#A8DBC9}
+.task-card.missed{background:#FEF5F5;border-color:#F0AEAE;opacity:.75}
+.chk{width:32px;height:32px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;border:2px solid #ddd;background:#f8f9fa;transition:all .15s}
+.task-card.done .chk{background:#1D9E75;border-color:#1D9E75;color:#fff}
+.task-card.missed .chk{background:#E24B4A;border-color:#E24B4A;color:#fff}
+.task-card:not(.done):not(.missed) .chk{color:#bbb}
+.task-info{flex:1;min-width:0}
 .task-name{font-size:13px;font-weight:600;line-height:1.35;color:#1a1a1a}
-.task-resp{font-size:10px;margin-top:3px}
-.bdg{display:inline-block;font-size:10px;padding:2px 7px;border-radius:5px;font-weight:700}
+.task-card.done .task-name{color:#0F6E56}
+.task-card.missed .task-name{color:#A32D2D;text-decoration:line-through}
+.task-resp{margin-top:3px}
+.bdg{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700}
 .ra{background:#E6F1FB;color:#185FA5}.rc{background:#FAEEDA;color:#854F0B}.rp{background:#EEEDFE;color:#534AB7}.rx{background:#E1F5EE;color:#0F6E56}.rk{background:#FCEBEB;color:#A32D2D}
-.task-status{font-size:10px;font-weight:700;white-space:nowrap}
-.s-done{color:#0F6E56}.s-pend{color:#888}
 
-/* RECORDATORIO */
-.rem-bar{background:#fff;border:2px solid #E24B4A;border-radius:12px;padding:.875rem 1rem;margin-bottom:.875rem;display:flex;align-items:flex-start;gap:12px}
-.rem-bar.hide{display:none}
-.rem-ok{background:#fff;border:2px solid #1D9E75;border-radius:12px;padding:.875rem 1rem;margin-bottom:.875rem;display:flex;align-items:center;gap:12px}
-.rem-ok.hide{display:none}
-.rem-close{width:28px;height:28px;border-radius:50%;border:none;background:none;cursor:pointer;color:#888;font-size:16px;flex-shrink:0}
+/* EMPTY STATE */
+.empty{text-align:center;padding:2.5rem 1rem;color:#aaa}
+.empty-icon{font-size:3rem;margin-bottom:.75rem}
+.empty-msg{font-size:14px;font-weight:600}
 
-/* OBSERVACIONES */
-.obs-sec{background:#fff;border:0.5px solid #B5D4F4;border-radius:12px;overflow:hidden;margin-top:.875rem}
-.obs-hdr{background:#E6F1FB;padding:.625rem 1rem;border-bottom:1.5px solid #B5D4F4;display:flex;align-items:center;justify-content:space-between}
-.obs-ht{font-size:12px;font-weight:800;color:#042C53}
-.obs-body{padding:.875rem}
-.obs-ta{font-family:inherit;font-size:13px;color:#1a1a1a;background:#f8f8f8;border:0.5px solid #ddd;border-radius:8px;padding:10px 12px;resize:vertical;min-height:80px;width:100%;font-weight:500}
-.obs-ta:focus{outline:2px solid #185FA5;border-color:transparent}
+/* FOOTER */
+.footer{text-align:center;font-size:11px;color:#bbb;margin-top:1.5rem;font-weight:600}
 
-.footer{text-align:center;font-size:10px;color:#aaa;margin-top:1.5rem}
+/* PROGRESS RING */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 </style>
 </head>
 <body>
-<div class="app">
+<div class="wrap">
 
+  <!-- HEADER -->
   <div class="hdr">
-    <h1>Seguimiento Diario — Megatiendas</h1>
-    <div class="hdr-sub">Marca cada actividad cuando la completes</div>
-    <select class="store-sel" id="store-sel" onchange="setStore(this.value)">
-      <option value="">— Selecciona tu tienda —</option>
-      <option>UNICO</option><option>CALLE 30</option><option>SOLEDAD</option>
-      <option>ALKARAWI</option><option>BOSTON</option><option>SANTO TOMAS</option>
-      <option>NUESTRO ATLANTICO</option><option>VILLA CAMPESTRE</option>
-    </select>
-  </div>
+    <div class="hdr-brand">📋 MEGATIENDAS — VISTA GERENTE</div>
+    <div class="hdr-title">Actividades de hoy</div>
 
-  <div class="status-bar">
-    <div class="status-txt">
-      <div class="dot dot-off" id="sdot"></div>
-      <span id="stxt">Conectando...</span>
+    <!-- Zona -->
+    <div class="zona-row">
+      <button class="zbtn on" id="zbtn-atl" onclick="setZone('Atlántico')">🌊 Atlántico</button>
+      <button class="zbtn" id="zbtn-bol" onclick="setZone('Bolívar')">🏛 Bolívar</button>
+      <button class="zbtn" id="zbtn-smt" onclick="setZone('Santa Marta')">⛰ Santa Marta</button>
     </div>
-    <button class="sync-btn" onclick="syncNow()">↻ Actualizar</button>
-  </div>
 
-  <!-- RESUMEN SEMANAL -->
-  <div class="semana-box" id="semana-box" style="display:none">
-    <div class="semana-mets">
-      <div class="s-met s-met-tot">
-        <div class="s-mv-tot" id="sem-tot">0</div>
-        <div class="s-ml">Total semana</div>
-      </div>
-      <div class="s-met s-met-ok">
-        <div class="s-mv-ok" id="sem-ok">0</div>
-        <div class="s-ml">✓ Completadas</div>
-      </div>
-      <div class="s-met s-met-pend">
-        <div class="s-mv-pend" id="sem-pend">0</div>
-        <div class="s-ml">⏳ Pendientes</div>
-      </div>
+    <!-- Tienda -->
+    <div class="store-sel-wrap">
+      <div class="store-sel-lbl">Selecciona tu tienda</div>
+      <select class="store-sel" id="ssel" onchange="setStore(this.value)"></select>
     </div>
-    <div class="sem-prog-wrap">
-      <div class="sem-prog-top">
-        <span>Cumplimiento semanal — <b id="sem-store"></b></span>
-        <span id="sem-pct"></span>
-      </div>
-      <div class="sem-prog-bar"><div class="sem-prog-fill" id="sem-fill"></div></div>
+
+    <!-- Status -->
+    <div class="status-row">
+      <div class="dot" id="sdot" style="background:#aaa"></div>
+      <span class="status-txt" id="stxt">Conectando...</span>
+      <button class="sync-btn" onclick="syncNow()">↻ Sync</button>
     </div>
-    <div class="dias-wrap" id="dias-grid"></div>
   </div>
 
-  <div class="fecha-bar">
-    <span class="fecha-txt" id="fecha-txt"></span>
-    <span class="dia-txt" id="dia-txt"></span>
-  </div>
-
-  <div class="prog-wrap">
-    <div class="prog-top">
-      <span id="prog-lbl">Cumplimiento del día</span>
-      <span id="prog-val"></span>
+  <!-- HOY -->
+  <div class="today-card" id="today-card">
+    <div>
+      <div class="today-date" id="today-date">—</div>
+      <div class="today-day" id="today-day">—</div>
     </div>
-    <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="today-pct-wrap">
+      <div class="today-pct" id="today-pct" style="color:#185FA5">—</div>
+      <div class="today-pct-lbl">cumplimiento hoy</div>
+    </div>
+    <div style="width:100%">
+      <div class="today-bar"><div class="today-bar-fill" id="today-bar-fill"></div></div>
+    </div>
   </div>
 
-  <div class="rem-bar hide" id="rem-pend">
-    <div style="font-size:22px;flex-shrink:0">⏰</div>
-    <div style="font-size:13px;line-height:1.5;flex:1"><b style="color:#A32D2D">Recordatorio</b><br>Tienes actividades pendientes. ¡Márcalas cuando las completes!</div>
-    <button class="rem-close" onclick="document.getElementById('rem-pend').classList.add('hide')">✕</button>
-  </div>
-  <div class="rem-ok hide" id="rem-done">
-    <div style="font-size:22px">✅</div>
-    <div style="font-size:13px;font-weight:600;color:#0F6E56">¡Todas las actividades del día completadas!</div>
-  </div>
-
+  <!-- LISTA DE TAREAS -->
   <div id="task-list"></div>
 
-  <div class="footer">Megatiendas Regional Barranquilla · Seguimiento Semanal</div>
+  <div class="footer">Megatiendas Regional Barranquilla &mdash; Solo actividades de hoy</div>
 </div>
 
 <script>
+/* ═══════════════ CONFIG ═══════════════ */
 var SB_URL='https://mcomfkhvhyznbtbhwpvs.supabase.co';
 var SB_KEY='sb_publishable_kh7LGnZ1CEwvybXBWP2fMg_Pf07MZZM';
-var DIAS=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-var DXS=['L','M','X','J','V','S','D'];
+
+var ZONES={
+  'Atlántico':{key:'atl',stores:['UNICO','CALLE 30','SOLEDAD','ALKARAWI','BOSTON','SANTO TOMAS','NUESTRO ATLANTICO','VILLA CAMPESTRE']},
+  'Bolívar':{key:'bol',stores:['PRADO','BAZURTO','SAN FERNANDO','OLAYA','TURBACO','SOCORRO','LA MARIA','CABRERO','AVENIDA PEDRO DE HEREDIA','TERMINAL DE TRANSPORTE','BOCAGRANDE','TURBACO 2(LA POPA)','ARJONA (LA POPA)','TORICES','CAMPESTRE','SAN JOSE DE LOS CAMPANOS','AEROPUERTO']},
+  'Santa Marta':{key:'smt',stores:['MERCADO','RODADERO','TRANSPORTE','SANTA CRUZ','BAVARIA','CIENAGA']}
+};
+
 var TASKS=[
-  {id:'t00',g:'Administrativo',t:'Revisión de ausencias de personal',r:'Ambos',rc:'ra',d:[0,1,2,3,4,5,6]},
-  {id:'t09',g:'Administrativo',t:'Revisión cierre de órdenes parciales',r:'Ambos',rc:'ra',d:[0,1,2,3,4,5,6]},
-  {id:'t01',g:'Comercial',t:'Entrega plan de acción — Dinámicas comerciales',r:'Ambos',rc:'ra',d:[0,5]},
-  {id:'t02',g:'Comercial',t:'Gestión agotados y excesos',r:'Comercial',rc:'rc',d:[0,3]},
-  {id:'t03',g:'Comercial',t:'Gestión antigüedad por categoría',r:'Comercial',rc:'rc',d:[1,3]},
-  {id:'t04',g:'Comercial',t:'Gestión de vencidos',r:'Comercial',rc:'rc',d:[1,3]},
-  {id:'t05',g:'Comercial',t:'Gestión Venta Cero — bodega sin surtido',r:'Comercial',rc:'rc',d:[0,1,2,3,4,5,6]},
-  {id:'t06',g:'Comercial',t:'Gestión y ajuste 1 a 5 unidades',r:'Comercial',rc:'rc',d:[0,2,4]},
-  {id:'t07',g:'Comercial',t:'Gestión, depuración y organización bodega 03',r:'Comercial',rc:'rc',d:[0,1]},
-  {id:'t12',g:'Comercial',t:'Plan de organización de bodegas',r:'Comercial',rc:'rc',d:[0,1,2,3,4]},
-  {id:'t28',g:'Comercial',t:'Ingreso Facturas suministros',r:'Ambos',rc:'ra',d:[0,2,4]},
-  {id:'t29',g:'Comercial',t:'Revisión de Campeones',r:'Ambos',rc:'ra',d:[1]},
-  {id:'t30',g:'Comercial',t:'Bodega 02 y 04',r:'Ambos',rc:'ra',d:[0]},
-  {id:'t10',g:'Principal',t:'Revisión inventario transitorio (TST-TET-SDT-EDT)',r:'Principal',rc:'rp',d:[0,1,2,3,4,5,6]},
-  {id:'t11',g:'Principal',t:'Revisión ítems fuera de portafolio',r:'Principal',rc:'rp',d:[0,3]},
-  {id:'t13',g:'Principal',t:'Revisión cuenta exposición y negociaciones',r:'Principal',rc:'rp',d:[0]},
-  {id:'t14',g:'Principal',t:'Revisión exhibiciones y lineales sin precio',r:'Principal',rc:'rp',d:[0,1,2,3,4,5,6]},
-  {id:'t15',g:'Principal',t:'Revisión implementación Tipología MABCD',r:'Principal',rc:'rp',d:[0,1,2,3,4,5,6]},
-  {id:'t16',g:'Principal',t:'Correo análisis de ventas (presupuesto / cómo vas)',r:'Principal',rc:'rp',d:[0]},
-  {id:'t17',g:'Principal',t:'Actualización Link de Mantenimiento',r:'Principal',rc:'rp',d:[0,5]},
-  {id:'t18',g:'Principal',t:'Revisión merma — reunión jueves',r:'Principal',rc:'rp',d:[3]},
-  {id:'t19',g:'Principal',t:'Reunión FOCO',r:'Principal',rc:'rp',d:[0]},
-  {id:'t20',g:'Principal',t:'Cumplimiento CNP',r:'Principal',rc:'rp',d:[0,1,2,3,4,5,6]},
-  {id:'t21',g:'Principal',t:'Limpieza en góndolas (pegotes)',r:'Ambos',rc:'ra',d:[0,1,2,3,4,5,6]},
-  {id:'t08',g:'Caja',t:'Organización y aseo puntos de pago',r:'Sup caja',rc:'rx',d:[3,6]},
-  {id:'t22',g:'Coordinadores',t:'Lavado carritos y canastillas',r:'Coordinadores',rc:'rk',d:[5,6]},
-  {id:'t23',g:'Coordinadores',t:'Lavado cava de lácteos',r:'Coordinadores',rc:'rk',d:[1,3,5,6]},
-  {id:'t24',g:'Coordinadores',t:'Lavado cavas Fruver y Carnes',r:'Coordinadores',rc:'rk',d:[0,3,5,6]},
-  {id:'t25',g:'Coordinadores',t:'Lavado canastillas Fruver',r:'Coordinadores',rc:'rk',d:[3,5,6]},
-  {id:'t26',g:'Coordinadores',t:'Lavado a fondo horno de pollos',r:'Coordinadores',rc:'rk',d:[5,6]},
-  {id:'t27',g:'Coordinadores',t:'Lavado a fondo recibo',r:'Coordinadores',rc:'rk',d:[5,6]}
+  {id:'t00',g:'Administrativo',rc:'ra',t:'Revisión de ausencias de personal',r:'Ambos',d:[0,1,2,3,4,5,6]},
+  {id:'t09',g:'Administrativo',rc:'ra',t:'Revisión cierre de órdenes parciales',r:'Ambos',d:[0,1,2,3,4,5,6]},
+  {id:'t01',g:'Comercial',rc:'ra',t:'Entrega plan de acción — Dinámicas comerciales',r:'Ambos',d:[0,5]},
+  {id:'t02',g:'Comercial',rc:'rc',t:'Gestión agotados y excesos',r:'Comercial',d:[0,3]},
+  {id:'t03',g:'Comercial',rc:'rc',t:'Gestión antigüedad por categoría',r:'Comercial',d:[1,3]},
+  {id:'t04',g:'Comercial',rc:'rc',t:'Gestión de vencidos',r:'Comercial',d:[1,3]},
+  {id:'t05',g:'Comercial',rc:'rc',t:'Gestión Venta Cero — bodega sin surtido',r:'Comercial',d:[0,1,2,3,4,5,6]},
+  {id:'t06',g:'Comercial',rc:'rc',t:'Gestión y ajuste 1 a 5 unidades',r:'Comercial',d:[0,4]},
+  {id:'t07',g:'Comercial',rc:'rc',t:'Gestión, depuración y organización bodega 03',r:'Comercial',d:[0,1]},
+  {id:'t12',g:'Comercial',rc:'rc',t:'Plan de organización de bodegas',r:'Comercial',d:[0,1,2,3,4]},
+  {id:'t28',g:'Comercial',rc:'ra',t:'Ingreso Facturas suministros',r:'Ambos',d:[0,2,4]},
+  {id:'t29',g:'Comercial',rc:'ra',t:'Revisión de Campeones',r:'Ambos',d:[1]},
+  {id:'t30',g:'Comercial',rc:'ra',t:'Bodega 02 y 04',r:'Ambos',d:[0]},
+  {id:'t31',g:'Comercial',rc:'rc',t:'Revisar Rq Pendientes de Bodega',r:'Comercial',d:[0,1,2,3,4]},
+  {id:'t10',g:'Principal',rc:'rp',t:'Revisión inventario transitorio (TST-TET-SDT-EDT)',r:'Principal',d:[0,1,2,3,4,5,6]},
+  {id:'t11',g:'Principal',rc:'rp',t:'Revisión ítems fuera de portafolio',r:'Principal',d:[0,3]},
+  {id:'t13',g:'Principal',rc:'rp',t:'Revisión cuenta exposición y negociaciones',r:'Principal',d:[3]},
+  {id:'t14',g:'Principal',rc:'rp',t:'Revisión exhibiciones y lineales sin precio',r:'Principal',d:[0,1,2,3,4,5,6]},
+  {id:'t15',g:'Principal',rc:'rp',t:'Revisión implementación Tipología MABCD',r:'Principal',d:[0,1,2,3,4,5,6]},
+  {id:'t16',g:'Principal',rc:'rp',t:'Correo análisis de ventas (presupuesto / cómo vas)',r:'Principal',d:[0]},
+  {id:'t17',g:'Principal',rc:'rp',t:'Actualización Link de Mantenimiento',r:'Principal',d:[0,5]},
+  {id:'t18',g:'Principal',rc:'rp',t:'Revisión merma — reunión jueves',r:'Principal',d:[3]},
+  {id:'t19',g:'Principal',rc:'rp',t:'Reunión FOCO',r:'Principal',d:[0]},
+  {id:'t20',g:'Principal',rc:'rp',t:'Cumplimiento CNP',r:'Principal',d:[0,1,2,3,4,5,6]},
+  {id:'t21',g:'Principal',rc:'ra',t:'Limpieza en góndolas (pegotes)',r:'Ambos',d:[0,1,2,3,4,5,6]},
+  {id:'t08',g:'Caja',rc:'rx',t:'Organización y aseo puntos de pago',r:'Sup caja',d:[3,6]},
+  {id:'t22',g:'Coordinadores',rc:'rk',t:'Lavado carritos y canastillas',r:'Coordinadores',d:[5,6]},
+  {id:'t23',g:'Coordinadores',rc:'rk',t:'Lavado cava de lácteos',r:'Coordinadores',d:[1,3,5,6]},
+  {id:'t24',g:'Coordinadores',rc:'rk',t:'Lavado cavas Fruver y Carnes',r:'Coordinadores',d:[0,3,5,6]},
+  {id:'t25',g:'Coordinadores',rc:'rk',t:'Lavado canastillas Fruver',r:'Coordinadores',d:[3,5,6]},
+  {id:'t26',g:'Coordinadores',rc:'rk',t:'Lavado a fondo horno de pollos',r:'Coordinadores',d:[5,6]},
+  {id:'t27',g:'Coordinadores',rc:'rk',t:'Lavado a fondo recibo',r:'Coordinadores',d:[5,6]}
 ];
 var GROUPS=['Administrativo','Comercial','Principal','Caja','Coordinadores'];
-var cur='',checks={},obsData={};
+var DAYS_ES=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+var MONTHS_ES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
+var curZone='Atlántico',cur='',checks={};
+
+/* ═══════════════ HELPERS ═══════════════ */
+function sbH(){return{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'};}
 function getMon(){var n=new Date(),dy=n.getDay(),diff=dy===0?-6:1-dy,m=new Date(n);m.setDate(n.getDate()+diff);m.setHours(0,0,0,0);return m;}
 function wkKey(){return getMon().toISOString().slice(0,10);}
-function todayDi(){var mon=getMon(),now=new Date();now.setHours(0,0,0,0);return Math.round((now-mon)/86400000);}
-function ck(id,di){return cur+'|'+wkKey()+'|'+id+'|'+di;}
-function done(id,di){return !!checks[ck(id,di)];}
+function todayDi(){var mon=getMon(),now=new Date();now.setHours(0,0,0,0);var d=Math.round((now-mon)/86400000);return(d>=0&&d<7)?d:-1;}
+function ck(s,w,id,di){return s+'|'+w+'|'+id+'|'+di;}
+function isDone(id,di){return!!checks[ck(cur,wkKey(),id,di)];}
 function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function pcol(p){return p>=85?'#1D9E75':p>=60?'#EF9F27':'#E24B4A';}
-function pc(p){return p>=85?'pg':p>=60?'pa':'pr';}
-function sbH(){return{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'};}
+function pcls(p){return p>=85?'pg':p>=60?'pa':'pr';}
 
-function setStatus(s){
+/* ═══════════════ SUPABASE ═══════════════ */
+function setStatus(st){
   var dot=document.getElementById('sdot'),txt=document.getElementById('stxt');
-  var cfg={ok:{c:'#1D9E75',t:'✅ Sincronizado'},sync:{c:'#EF9F27',t:'⏳ Sincronizando...'},err:{c:'#E24B4A',t:'❌ Sin conexión'},off:{c:'#aaa',t:'Selecciona tu tienda'}};
-  var v=cfg[s]||cfg.off;
-  if(dot){dot.style.background=v.c;dot.className='dot '+(s==='sync'?'dot-sync':s==='ok'?'dot-ok':s==='err'?'dot-err':'dot-off');}
-  if(txt)txt.textContent=v.t;
+  var now=new Date(),hh=now.getHours(),mm=now.getMinutes(),ts=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
+  var cfg={ok:{c:'#4ADE80',m:'✅ Sincronizado '+ts},sync:{c:'#FCD34D',m:'⏳ Sincronizando...'},err:{c:'#F87171',m:'❌ Error de conexión'}};
+  var v=cfg[st]||{c:'#aaa',m:'Sin conexión'};
+  if(dot)dot.style.background=v.c;if(txt)txt.textContent=v.m;
 }
-
-function obsKey(di){return cur+'|'+wkKey()+'|day|'+di;}
-function getObs(di){return obsData[obsKey(di)]||'';}
-function saveObsTxt(di,val){
-  obsData[obsKey(di)]=val;
+async function sbLoad(){
+  setStatus('sync');
   try{
-    fetch(SB_URL+'/rest/v1/observations?obs_key=eq.'+encodeURIComponent(obsKey(di)),{method:'DELETE',headers:sbH()}).then(function(){
-      if(val.trim()){fetch(SB_URL+'/rest/v1/observations',{method:'POST',headers:sbH(),body:JSON.stringify([{obs_key:obsKey(di),obs_id:String(di),date:DIAS[di]||'',text:val}])});}
-    });
+    var r=await fetch(SB_URL+'/rest/v1/checks?select=*&done=eq.true',{headers:sbH()});
+    var rows=await r.json();
+    checks={};
+    rows.forEach(function(row){checks[row.store+'|'+row.week+'|'+row.task_id+'|'+row.day_idx]=true;});
+    setStatus('ok');
+  }catch(e){setStatus('err');}
+}
+async function syncNow(){await sbLoad();render();}
+async function sbToggle(id,di,on){
+  var s=cur,w=wkKey();
+  try{
+    if(on){await fetch(SB_URL+'/rest/v1/checks',{method:'POST',headers:sbH(),body:JSON.stringify({store:s,week:w,task_id:id,day_idx:di,done:true})});}
+    else{await fetch(SB_URL+'/rest/v1/checks?store=eq.'+encodeURIComponent(s)+'&week=eq.'+encodeURIComponent(w)+'&task_id=eq.'+encodeURIComponent(id)+'&day_idx=eq.'+di,{method:'DELETE',headers:sbH()});}
   }catch(e){}
 }
 
-async function loadChecks(){
-  if(!cur)return;
-  setStatus('sync');
-  try{
-    var res=await fetch(SB_URL+'/rest/v1/checks?select=*&store=eq.'+encodeURIComponent(cur)+'&week=eq.'+wkKey()+'&done=eq.true',{headers:sbH()});
-    var rows=await res.json();
-    checks={};
-    rows.forEach(function(r){checks[r.store+'|'+r.week+'|'+r.task_id+'|'+r.day_idx]=true;});
-    var r2=await fetch(SB_URL+'/rest/v1/observations?select=*',{headers:sbH()});
-    var orows=await r2.json();
-    orows.forEach(function(r){if(r.obs_key.indexOf(cur+'|'+wkKey()+'|day|')===0)obsData[r.obs_key]=r.text;});
-    setStatus('ok');
-  }catch(e){setStatus('err');}
+/* ═══════════════ ZONA / TIENDA ═══════════════ */
+function setZone(z){
+  curZone=z;
+  cur=ZONES[z].stores[0];
+  // Botones
+  Object.keys(ZONES).forEach(function(zn){
+    var k=ZONES[zn].key;
+    var b=document.getElementById('zbtn-'+k);
+    if(b)b.classList.toggle('on',zn===z);
+  });
+  // Rebuild store select
+  var opts=ZONES[z].stores.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('');
+  var sel=document.getElementById('ssel');if(sel)sel.innerHTML=opts;
   render();
 }
+function setStore(v){cur=v;render();}
 
-async function tog(id,di){
-  if(!cur)return;
-  var k=ck(id,di),isDone;
-  if(checks[k]){delete checks[k];isDone=false;}else{checks[k]=true;isDone=true;}
-  render();
-  try{
-    if(isDone){await fetch(SB_URL+'/rest/v1/checks',{method:'POST',headers:sbH(),body:JSON.stringify({store:cur,week:wkKey(),task_id:id,day_idx:di,done:true})});}
-    else{await fetch(SB_URL+'/rest/v1/checks?store=eq.'+encodeURIComponent(cur)+'&week=eq.'+wkKey()+'&task_id=eq.'+encodeURIComponent(id)+'&day_idx=eq.'+di,{method:'DELETE',headers:sbH()});}
-    setStatus('ok');
-  }catch(e){setStatus('err');}
+/* ═══════════════ TOGGLE ═══════════════ */
+function tog(id,di){
+  var k=ck(cur,wkKey(),id,di),on;
+  if(checks[k]){delete checks[k];on=false;}else{checks[k]=true;on=true;}
+  render();sbToggle(id,di,on);
 }
 
-function setStore(v){
-  cur=v;
-  if(!v){setStatus('off');document.getElementById('semana-box').style.display='none';document.getElementById('task-list').innerHTML='';return;}
-  localStorage.setItem('gerente-tienda',v);
-  loadChecks();
-  setInterval(function(){loadChecks();},30000);
-}
-
-function syncNow(){loadChecks();}
-
+/* ═══════════════ RENDER ═══════════════ */
 function render(){
-  if(!cur)return;
-  var tdi=todayDi();
+  var tdi=todayDi(),w=wkKey();
   var now=new Date();
-  var meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-  document.getElementById('fecha-txt').textContent=now.getDate()+' de '+meses[now.getMonth()]+' de '+now.getFullYear();
-  document.getElementById('dia-txt').textContent=DIAS[tdi]||'—';
 
-  // Resumen semanal
-  var allD=[0,1,2,3,4,5,6];
-  var semTot=0,semOk=0;
-  TASKS.forEach(function(tk){allD.forEach(function(di){if(tk.d.indexOf(di)>=0){semTot++;if(done(tk.id,di))semOk++;}});});
-  var semPend=semTot-semOk;
-  var semP=semTot?Math.round(semOk/semTot*100):0;
-  document.getElementById('semana-box').style.display='';
-  document.getElementById('sem-store').textContent=cur;
-  document.getElementById('sem-tot').textContent=semTot;
-  document.getElementById('sem-ok').textContent=semOk;
-  document.getElementById('sem-pend').textContent=semPend;
-  document.getElementById('sem-pct').innerHTML='<b>'+semOk+'</b>/'+semTot+' <span class="pill '+pc(semP)+'">'+semP+'%</span>';
-  document.getElementById('sem-fill').style.cssText='width:'+semP+'%;background:'+pcol(semP);
+  // Today card
+  var dayName=DAYS_ES[now.getDay()];
+  var dateStr=now.getDate()+' de '+MONTHS_ES[now.getMonth()]+' '+now.getFullYear();
+  var dateEl=document.getElementById('today-date');
+  var dayEl=document.getElementById('today-day');
+  if(dateEl)dateEl.textContent=dateStr;
+  if(dayEl)dayEl.textContent=dayName;
 
-  // Barras por día
-  var diasHtml='';
-  for(var di=0;di<7;di++){
-    var diTasks=TASKS.filter(function(tk){return tk.d.indexOf(di)>=0;});
-    var diTot=diTasks.length,diOk=0;
-    diTasks.forEach(function(tk){if(done(tk.id,di))diOk++;});
-    var diP=diTot?Math.round(diOk/diTot*100):0;
-    var isHoy=di===tdi,isFut=di>tdi;
-    var barCol=isHoy?'#C0392B':diP>=85?'#1D9E75':diP>=60?'#EF9F27':diP>0?'#E24B4A':'#D3D1C7';
-    diasHtml+='<div class="dia-col'+(isHoy?' hoy-col':isFut?' fut-col':'')+'">';
-    diasHtml+='<span class="dia-name'+(isHoy?' hoy-d':'')+'">'+DXS[di]+'</span>';
-    diasHtml+='<div class="dia-outer"><div class="dia-inner" style="height:'+diP+'%;background:'+barCol+'"></div></div>';
-    diasHtml+='<span class="dia-pct'+(isHoy?' hoy-d':'')+'">'+(isFut?'—':diP+'%')+'</span>';
-    diasHtml+='</div>';
+  // Tasks for today
+  if(tdi<0){
+    document.getElementById('task-list').innerHTML='<div class="empty"><div class="empty-icon">📅</div><div class="empty-msg">No hay actividades para hoy.<br>La semana va de lunes a domingo.</div></div>';
+    var tp=document.getElementById('today-pct');if(tp){tp.textContent='—';tp.style.color='#aaa';}
+    var bf=document.getElementById('today-bar-fill');if(bf)bf.style.cssText='width:0%;background:#aaa';
+    return;
   }
-  document.getElementById('dias-grid').innerHTML=diasHtml;
 
-  // Progreso hoy
   var todayTasks=TASKS.filter(function(tk){return tk.d.indexOf(tdi)>=0;});
-  var tot=todayTasks.length,dn=0;
-  todayTasks.forEach(function(tk){if(done(tk.id,tdi))dn++;});
+  var dn=todayTasks.filter(function(tk){return isDone(tk.id,tdi);}).length;
+  var tot=todayTasks.length;
   var p=tot?Math.round(dn/tot*100):0;
-  document.getElementById('prog-fill').style.cssText='width:'+p+'%;background:'+pcol(p);
-  document.getElementById('prog-val').innerHTML='<b>'+dn+'</b>/'+tot+' <span class="pill '+pc(p)+'">'+p+'%</span>';
-  document.getElementById('prog-lbl').textContent='Cumplimiento hoy — '+cur;
 
-  var remPend=document.getElementById('rem-pend'),remDone=document.getElementById('rem-done');
-  if(tot>0&&dn===tot){remPend.classList.add('hide');remDone.classList.remove('hide');}
-  else if(tot>0&&dn<tot){remPend.classList.remove('hide');remDone.classList.add('hide');}
-  else{remPend.classList.add('hide');remDone.classList.add('hide');}
+  // Progress
+  var tp=document.getElementById('today-pct');
+  if(tp){tp.textContent=p+'%';tp.style.color=pcol(p);}
+  var bf=document.getElementById('today-bar-fill');
+  if(bf)bf.style.cssText='width:'+p+'%;background:'+pcol(p);
 
-  // Lista de tareas
+  if(!todayTasks.length){
+    document.getElementById('task-list').innerHTML='<div class="empty"><div class="empty-icon">✨</div><div class="empty-msg">No hay tareas programadas para hoy.</div></div>';
+    return;
+  }
+
   var html='';
   GROUPS.forEach(function(g){
-    var gt=TASKS.filter(function(tk){return tk.g===g&&tk.d.indexOf(tdi)>=0;});
+    var gt=todayTasks.filter(function(tk){return tk.g===g;});
     if(!gt.length)return;
-    var gdn=gt.filter(function(tk){return done(tk.id,tdi);}).length;
-    var gp=gt.length?Math.round(gdn/gt.length*100):0;
-    html+='<div class="grp-hdr">'+g+'<span class="pill '+pc(gp)+'">'+gdn+'/'+gt.length+'</span></div>';
+    var gdn=gt.filter(function(tk){return isDone(tk.id,tdi);}).length;
+    var gp=gt.length?Math.round(gdn/gt.length*100):null;
+    html+='<div class="grp-hdr">'+g+(gp!==null?'<span class="grp-pct '+pcls(gp)+'">'+gp+'%</span>':'')+'</div>';
     gt.forEach(function(tk){
-      var ok=done(tk.id,tdi);
-      html+='<div class="task-card'+(ok?' done-card':'')+'">';
-      html+='<div class="task-hdr" onclick="tog(\''+tk.id+'\','+tdi+')" style="cursor:pointer">';
-      html+='<div class="task-check '+(ok?'cv':'cg')+'">'+(ok?'✓':'')+'</div>';
-      html+='<div class="task-info"><div class="task-name">'+esc(tk.t)+'</div>';
-      html+='<div class="task-resp"><span class="bdg '+tk.rc+'">'+tk.r+'</span></div></div>';
-      html+='<span class="task-status '+(ok?'s-done':'s-pend')+'">'+(ok?'Completada':'Pendiente')+'</span>';
-      html+='</div></div>';
+      var ok=isDone(tk.id,tdi);
+      // missed = not done and today has passed (handled as tdi = today so never "missed" in this view, just pending)
+      var cls=ok?' done':'';
+      html+='<div class="task-card'+cls+'" onclick="tog(\''+tk.id+'\','+tdi+')">'
+        +'<div class="chk">'+(ok?'✓':'')+'</div>'
+        +'<div class="task-info">'
+        +'<div class="task-name">'+esc(tk.t)+'</div>'
+        +'<div class="task-resp"><span class="bdg '+tk.rc+'">'+tk.r+'</span></div>'
+        +'</div>'
+        +'</div>';
     });
   });
-  if(!html)html='<div style="text-align:center;padding:2rem;color:#aaa;font-size:13px">No hay actividades para hoy.</div>';
-  document.getElementById('task-list').innerHTML=html;
 
-  // Observación al final
-  var obsVal=getObs(tdi);
-  document.getElementById('task-list').innerHTML+=
-    '<div class="obs-sec"><div class="obs-hdr">'
-    +'<span class="obs-ht">📝 Observaciones del día — <span style="color:#185FA5">'+DIAS[tdi]+'</span></span>'
-    +'</div><div class="obs-body">'
-    +'<textarea class="obs-ta" placeholder="Escribe aquí tus observaciones del día..." onchange="saveObsTxt('+tdi+',this.value)">'+esc(obsVal)+'</textarea>'
-    +'</div></div>';
+  document.getElementById('task-list').innerHTML=html;
 }
 
-var saved=localStorage.getItem('gerente-tienda');
-if(saved){document.getElementById('store-sel').value=saved;setStore(saved);}
-else{setStatus('off');}
+/* ═══════════════ INICIO ═══════════════ */
+async function init(){
+  // Init store dropdown
+  var opts=ZONES['Atlántico'].stores.map(function(s){return'<option value="'+s+'">'+s+'</option>';}).join('');
+  var sel=document.getElementById('ssel');if(sel)sel.innerHTML=opts;
+  cur=ZONES['Atlántico'].stores[0];
+  await sbLoad();
+  render();
+  // Auto-sync cada 30s
+  setInterval(function(){sbLoad().then(render);},30000);
+}
+init();
 </script>
 </body>
 </html>

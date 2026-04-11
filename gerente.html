@@ -70,6 +70,15 @@ body{font-family:system-ui,sans-serif;background:#f0f4f8;color:#1a1a1a;min-heigh
 .empty-icon{font-size:3rem;margin-bottom:.75rem}
 .empty-msg{font-size:14px;font-weight:600}
 
+/* MÉTRICAS SEMANALES */
+.gmet{border-radius:10px;padding:10px 12px;background:#fff;position:relative;overflow:hidden}
+.gmet::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px}
+.gmet-tot::before{background:#185FA5}.gmet-ok::before{background:#1D9E75}.gmet-bad::before{background:#E24B4A}.gmet-hok::before{background:#042C53}.gmet-hpnd::before{background:#854F0B}
+.gmet-bg-tot{background:linear-gradient(135deg,#E6F1FB,#fff)}.gmet-bg-ok{background:linear-gradient(135deg,#E1F5EE,#fff)}.gmet-bg-bad{background:linear-gradient(135deg,#FCEBEB,#fff)}.gmet-bg-hok{background:linear-gradient(135deg,#EEEDFE,#fff)}.gmet-bg-hpnd{background:linear-gradient(135deg,#FAEEDA,#fff)}
+.gmet-v{font-size:22px;font-weight:800;margin-bottom:1px}
+.gmet-l{font-size:9px;color:#888;font-weight:600}
+.gmet-icon{font-size:16px;position:absolute;top:8px;right:10px;opacity:.18}
+
 /* BOTÓN RESUMEN */
 .resumen-btn{width:100%;margin-top:1rem;padding:10px;border-radius:10px;border:1.5px solid #E24B4A;background:#fff;color:#A32D2D;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s}
 .resumen-btn:hover{background:#FEF5F5}
@@ -156,6 +165,20 @@ body{font-family:system-ui,sans-serif;background:#f0f4f8;color:#1a1a1a;min-heigh
     </div>
     <div style="width:100%">
       <div class="today-bar"><div class="today-bar-fill" id="today-bar-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- MÉTRICAS SEMANALES -->
+  <div id="wk-mets" style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-bottom:.75rem"></div>
+
+  <!-- BARRA CUMPLIMIENTO SEMANAL -->
+  <div style="margin-bottom:.875rem">
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:4px">
+      <span>Cumplimiento semanal — <b id="g-store-name"></b></span>
+      <span id="g-wk-pv"></span>
+    </div>
+    <div style="height:7px;border-radius:4px;background:#E6F1FB;overflow:hidden">
+      <div id="g-wk-pf" style="height:100%;border-radius:4px;transition:width .4s,background .4s"></div>
     </div>
   </div>
 
@@ -317,6 +340,36 @@ function render(){
   var dayEl=document.getElementById('today-day');
   if(dateEl)dateEl.textContent=dateStr;
   if(dayEl)dayEl.textContent=dayName;
+
+  // Métricas semanales (todos los días)
+  var wkTot=0,wkDn=0,wkMiss=0,wkHDn=0,wkHPnd=0;
+  TASKS.forEach(function(tk){
+    tk.d.forEach(function(di){
+      wkTot++;
+      var ok=isDone(tk.id,di);
+      if(ok) wkDn++;
+      else if(tdi>=0&&di<tdi) wkMiss++;
+      if(di===tdi){ok?wkHDn++:wkHPnd++;}
+    });
+  });
+  var wkP=wkTot?Math.round(wkDn/wkTot*100):0;
+  var mets=[
+    {v:wkTot,l:'Total semana',c:'#185FA5',cls:'gmet-tot gmet-bg-tot',icon:'📋'},
+    {v:wkDn, l:'Completadas', c:'#1D9E75',cls:'gmet-ok gmet-bg-ok',  icon:'✅'},
+    {v:wkMiss,l:'Incumplidas',c:'#E24B4A',cls:'gmet-bad gmet-bg-bad',icon:'❌'},
+    {v:wkHDn, l:'Hechas hoy', c:'#042C53',cls:'gmet-hok gmet-bg-hok',icon:'🎯'},
+    {v:wkHPnd,l:'Pendientes hoy',c:'#854F0B',cls:'gmet-hpnd gmet-bg-hpnd',icon:'⏳'}
+  ];
+  var wmEl=document.getElementById('wk-mets');
+  if(wmEl) wmEl.innerHTML=mets.map(function(x){
+    return'<div class="gmet '+x.cls+'"><div class="gmet-icon">'+x.icon+'</div>'
+      +'<div class="gmet-v" style="color:'+x.c+'">'+x.v+'</div>'
+      +'<div class="gmet-l">'+x.l+'</div></div>';
+  }).join('');
+  var gsn=document.getElementById('g-store-name');if(gsn)gsn.textContent=cur;
+  var gpf=document.getElementById('g-wk-pf');if(gpf)gpf.style.cssText='width:'+wkP+'%;background:'+pcol(wkP);
+  var gpv=document.getElementById('g-wk-pv');
+  if(gpv)gpv.innerHTML='<b>'+wkDn+'</b>/'+wkTot+' <span style="display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;'+( wkP>=85?'background:#E1F5EE;color:#0F6E56':wkP>=60?'background:#FAEEDA;color:#854F0B':'background:#FCEBEB;color:#A32D2D')+'">'+wkP+'%</span>';
 
   // Tasks for today
   if(tdi<0){

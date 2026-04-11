@@ -70,10 +70,48 @@ body{font-family:system-ui,sans-serif;background:#f0f4f8;color:#1a1a1a;min-heigh
 .empty-icon{font-size:3rem;margin-bottom:.75rem}
 .empty-msg{font-size:14px;font-weight:600}
 
+/* BOTÓN RESUMEN */
+.resumen-btn{width:100%;margin-top:1rem;padding:10px;border-radius:10px;border:1.5px solid #E24B4A;background:#fff;color:#A32D2D;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s}
+.resumen-btn:hover{background:#FEF5F5}
+.resumen-btn .rbadge{background:#E24B4A;color:#fff;font-size:11px;font-weight:800;padding:2px 8px;border-radius:8px;min-width:20px;text-align:center}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(4,44,83,.5);z-index:100;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:620px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-hdr{background:#E24B4A;padding:.625rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-hdr-title{font-size:13px;font-weight:800;color:#fff}
+.modal-hdr-sub{font-size:11px;color:rgba(255,255,255,.75);margin-top:1px}
+.modal-close{width:28px;height:28px;border-radius:7px;border:1.5px solid rgba(255,255,255,.35);background:rgba(255,255,255,.15);color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;flex-shrink:0}
+.modal-leg{display:flex;gap:10px;flex-wrap:wrap;padding:6px 10px;font-size:10px;color:#888;align-items:center;border-bottom:1px solid #eee;flex-shrink:0;background:#fafafa}
+.modal-leg-item{display:flex;align-items:center;gap:4px}
+.modal-leg-dot{width:12px;height:12px;border-radius:3px;display:inline-block;flex-shrink:0}
+.modal-body{overflow:auto;flex:1}
+.modal-tbl{width:100%;border-collapse:collapse;min-width:480px;font-size:11px}
+.modal-tbl thead th{background:#E6F1FB;color:#185FA5;font-weight:800;padding:5px 3px;text-align:center;border-bottom:2px solid #B5D4F4;text-transform:uppercase;letter-spacing:.3px;font-size:10px;position:sticky;top:0;z-index:5;white-space:nowrap}
+.modal-tbl th.th-task{text-align:left;padding-left:10px;min-width:170px;color:#042C53;font-size:11px}
+.modal-tbl th.th-today{color:#C0392B!important;background:#FFF0EE!important}
+.modal-tbl tbody tr{border-bottom:0.5px solid #eee}
+.modal-tbl tr.grp td{background:#E6F1FB;padding:4px 10px;font-size:10px;font-weight:800;color:#042C53;text-transform:uppercase;letter-spacing:.4px}
+.modal-tbl td.td-task{font-size:11px;font-weight:600;padding:5px 4px 5px 10px;color:#222;line-height:1.35}
+.modal-tbl td.td-day{text-align:center;padding:3px 2px;vertical-align:middle}
+.modal-tbl td.td-today{background:rgba(192,57,43,.04)}
+.modal-tbl td.td-pct{text-align:center;padding:3px 5px;white-space:nowrap}
+.cell{width:24px;height:24px;border-radius:4px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800}
+.cv{background:#1D9E75;color:#fff}
+.cr{background:#E24B4A;color:#fff}
+.cp{background:#D3D1C7;color:#5F5E5A}
+.pill{display:inline-block;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;white-space:nowrap}
+.pg{background:#E1F5EE;color:#0F6E56}.pa{background:#FAEEDA;color:#854F0B}.pr{background:#FCEBEB;color:#A32D2D}.pn{background:#f0f0f0;color:#888}
+.gA{background:rgba(55,138,221,.03)}.gC{background:rgba(12,68,124,.02)}.gP{background:rgba(83,74,183,.02)}.gJ{background:rgba(29,158,117,.02)}.gK{background:rgba(226,75,74,.02)}
+.modal-all-ok{text-align:center;padding:2.5rem;color:#0F6E56}
+.modal-all-ok-icon{font-size:2.5rem;margin-bottom:.5rem}
+.modal-all-ok-msg{font-size:13px;font-weight:700}
+.modal-readonly{text-align:center;font-size:10px;color:#aaa;padding:7px;flex-shrink:0;border-top:1px solid #eee;background:#fafafa}
+
 /* FOOTER */
 .footer{text-align:center;font-size:11px;color:#bbb;margin-top:1.5rem;font-weight:600}
-
-/* PROGRESS RING */
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 </style>
 </head>
@@ -124,7 +162,34 @@ body{font-family:system-ui,sans-serif;background:#f0f4f8;color:#1a1a1a;min-heigh
   <!-- LISTA DE TAREAS -->
   <div id="task-list"></div>
 
+  <!-- BOTÓN RESUMEN SEMANAL -->
+  <button class="resumen-btn" onclick="openResumen()">
+    📋 Ver tareas incumplidas esta semana
+    <span class="rbadge" id="rbadge">—</span>
+  </button>
+
   <div class="footer">Megatiendas Regional Barranquilla &mdash; Solo actividades de hoy</div>
+</div>
+
+<!-- MODAL RESUMEN (solo lectura) -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeResumenOutside(event)">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-hdr-title">Tareas incumplidas — semana actual</div>
+        <div class="modal-hdr-sub" id="modal-sub">—</div>
+      </div>
+      <button class="modal-close" onclick="closeResumen()">✕</button>
+    </div>
+    <div class="modal-leg">
+      <span class="modal-leg-item"><span class="modal-leg-dot" style="background:#1D9E75"></span>Hecho</span>
+      <span class="modal-leg-item"><span class="modal-leg-dot" style="background:#E24B4A"></span>Incumplido</span>
+      <span class="modal-leg-item"><span class="modal-leg-dot" style="background:#D3D1C7"></span>Hoy</span>
+      <span class="modal-leg-item"><span class="modal-leg-dot" style="background:#f0f4f8;border:1px solid #ddd"></span>Futuro</span>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-readonly">Solo lectura — para marcar, usa el tablero diario</div>
+  </div>
 </div>
 
 <script>
@@ -298,7 +363,124 @@ function render(){
     });
   });
 
-  document.getElementById('task-list').innerHTML=html;
+  renderBadge();
+}
+
+/* ═══════════════ BADGE DEL BOTÓN ═══════════════ */
+function countMissed(){
+  var tdi=todayDi(),total=0;
+  for(var di=0;di<7;di++){
+    if(tdi>=0&&di>tdi) continue;
+    TASKS.forEach(function(tk){
+      if(tk.d.indexOf(di)>=0&&!isDone(tk.id,di)) total++;
+    });
+  }
+  return total;
+}
+function renderBadge(){
+  var n=countMissed();
+  var b=document.getElementById('rbadge');
+  var btn=document.querySelector('.resumen-btn');
+  if(b) b.textContent=n>0?n:'✓';
+  if(btn){
+    btn.style.borderColor=n>0?'#E24B4A':'#1D9E75';
+    btn.style.color=n>0?'#A32D2D':'#0F6E56';
+  }
+  if(b) b.style.background=n>0?'#E24B4A':'#1D9E75';
+}
+
+/* ═══════════════ MODAL RESUMEN (solo lectura) ═══════════════ */
+function openResumen(){
+  var tdi=todayDi(),w=wkKey(),mon=getMon();
+  var DSS=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  var GC={Administrativo:'gA',Comercial:'gC',Principal:'gP',Caja:'gJ',Coordinadores:'gK'};
+
+  // Calcular totales incumplidos
+  var totalMiss=0;
+  TASKS.forEach(function(tk){
+    for(var di=0;di<7;di++){
+      if(tdi>=0&&di>tdi) continue;
+      if(tk.d.indexOf(di)>=0&&!isDone(tk.id,di)) totalMiss++;
+    }
+  });
+
+  // Cabecera días
+  var thead='<tr><th class="th-task">Tarea</th>';
+  for(var di=0;di<7;di++){
+    var dt=new Date(mon);dt.setDate(mon.getDate()+di);
+    var isTd=(di===tdi);
+    var future=(tdi>=0&&di>tdi);
+    var cls=isTd?' th-today':'';
+    thead+='<th class="'+cls+'"'+(future?' style="color:#bbb"':'')+'>'+DSS[di]+'<br>'+dt.getDate()+'</th>';
+  }
+  thead+='<th>%</th></tr>';
+
+  // Filas por grupo
+  var tbody='';
+  GROUPS.forEach(function(g){
+    var gt=TASKS.filter(function(tk){return tk.g===g;});
+    if(!gt.length) return;
+    // % grupo solo días pasados+hoy
+    var gTot=0,gDn=0;
+    gt.forEach(function(tk){
+      for(var di=0;di<7;di++){
+        if(tdi>=0&&di>tdi) continue;
+        if(tk.d.indexOf(di)>=0){gTot++;if(isDone(tk.id,di))gDn++;}
+      }
+    });
+    var gp=gTot?Math.round(gDn/gTot*100):null;
+    tbody+='<tr class="grp"><td colspan="9">'+g+(gp!==null?'<span class="pill '+pcls(gp)+'" style="margin-left:6px">'+gp+'%</span>':'')+'</td></tr>';
+
+    gt.forEach(function(tk){
+      var gc=GC[g]||'';
+      // % tarea días pasados+hoy
+      var tTot=0,tDn=0;
+      for(var di=0;di<7;di++){
+        if(tdi>=0&&di>tdi) continue;
+        if(tk.d.indexOf(di)>=0){tTot++;if(isDone(tk.id,di))tDn++;}
+      }
+      var tp=tTot?Math.round(tDn/tTot*100):null;
+      tbody+='<tr class="'+gc+'"><td class="td-task">'+esc(tk.t)+'</td>';
+      for(var di=0;di<7;di++){
+        var isTd=(di===tdi);
+        var future=(tdi>=0&&di>tdi);
+        var tdCls='td-day'+(isTd?' td-today':'');
+        if(tk.d.indexOf(di)<0){
+          tbody+='<td class="'+tdCls+'"></td>';
+        } else if(future){
+          tbody+='<td class="'+tdCls+'"><div class="cell" style="background:#f0f4f8;color:#ccc;font-size:9px">–</div></td>';
+        } else {
+          var ok=isDone(tk.id,di);
+          var cs=ok?'cv':(isTd?'cp':'cr');
+          tbody+='<td class="'+tdCls+'"><div class="cell '+cs+'">'+(ok?'✓':(isTd?'':' ✕'))+'</div></td>';
+        }
+      }
+      tbody+='<td class="td-pct">'+(tp!==null?'<span class="pill '+pcls(tp)+'">'+tp+'%</span>':'')+'</td></tr>';
+    });
+  });
+
+  // Modal HTML
+  var hdrBg=totalMiss?'#E24B4A':'#1D9E75';
+  var sub=cur+' — '+(totalMiss?totalMiss+' tarea(s) sin completar':'¡Todo al día!');
+  var body=totalMiss
+    ? '<table class="modal-tbl"><thead>'+thead+'</thead><tbody>'+tbody+'</tbody></table>'
+    : '<div class="modal-all-ok"><div class="modal-all-ok-icon">🎉</div><div class="modal-all-ok-msg">¡Sin incumplimientos esta semana!</div></div>';
+
+  var hdrEl=document.querySelector('.modal-hdr');
+  var subEl=document.getElementById('modal-sub');
+  var bodyEl=document.getElementById('modal-body');
+  if(hdrEl) hdrEl.style.background=hdrBg;
+  if(subEl) subEl.textContent=sub;
+  if(bodyEl) bodyEl.innerHTML=body;
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeResumen(){
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function closeResumenOutside(e){
+  if(e.target===document.getElementById('modal-overlay')) closeResumen();
 }
 
 /* ═══════════════ INICIO ═══════════════ */

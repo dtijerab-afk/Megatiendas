@@ -527,12 +527,44 @@ function openResumen(){
     });
   });
 
+  // Bloque por responsable
+  var RESPS=[
+    {r:'Ambos',      rc:'ra', color:'#185FA5'},
+    {r:'Comercial',  rc:'rc', color:'#854F0B'},
+    {r:'Principal',  rc:'rp', color:'#534AB7'},
+    {r:'Sup caja',   rc:'rx', color:'#0F6E56'},
+    {r:'Coordinadores',rc:'rk',color:'#A32D2D'}
+  ];
+  var respHtml='<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:8px 10px;background:#fafafa;border-bottom:1px solid #eee">';
+  RESPS.forEach(function(rsp){
+    var rTot=0,rDn=0;
+    TASKS.filter(function(tk){return tk.r===rsp.r;}).forEach(function(tk){
+      for(var di=0;di<7;di++){
+        if(tdi>=0&&di>tdi) continue;
+        if(tk.d.indexOf(di)>=0){rTot++;if(isDone(tk.id,di))rDn++;}
+      }
+    });
+    var rp=rTot?Math.round(rDn/rTot*100):null;
+    var rpCls=rp===null?'pn':rp>=85?'pg':rp>=60?'pa':'pr';
+    respHtml+='<div style="background:#fff;border:0.5px solid #ddd;border-radius:8px;padding:7px 8px;border-top:3px solid '+rsp.color+'">'
+      +'<div style="font-size:9px;font-weight:800;color:'+rsp.color+';margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+rsp.r+'</div>'
+      +'<div style="display:flex;align-items:baseline;gap:4px;margin-bottom:4px">'
+      +'<span style="font-size:20px;font-weight:800;color:'+rsp.color+'">'+(rp!==null?rp+'%':'—')+'</span>'
+      +'<span style="font-size:9px;color:#aaa">'+rDn+'/'+rTot+'</span>'
+      +'</div>'
+      +'<div style="height:4px;border-radius:2px;background:#f0f0f0;overflow:hidden">'
+      +'<div style="height:100%;border-radius:2px;width:'+(rp||0)+'%;background:'+rsp.color+'"></div>'
+      +'</div>'
+      +'</div>';
+  });
+  respHtml+='</div>';
+
   // Modal HTML
   var hdrBg=totalMiss?'#E24B4A':'#1D9E75';
   var sub=cur+' — '+(totalMiss?totalMiss+' tarea(s) sin completar':'¡Todo al día!');
   var body=totalMiss
-    ? '<table class="modal-tbl"><thead>'+thead+'</thead><tbody>'+tbody+'</tbody></table>'
-    : '<div class="modal-all-ok"><div class="modal-all-ok-icon">🎉</div><div class="modal-all-ok-msg">¡Sin incumplimientos esta semana!</div></div>';
+    ? respHtml+'<table class="modal-tbl"><thead>'+thead+'</thead><tbody>'+tbody+'</tbody></table>'
+    : respHtml+'<div class="modal-all-ok"><div class="modal-all-ok-icon">🎉</div><div class="modal-all-ok-msg">¡Sin incumplimientos esta semana!</div></div>';
 
   var hdrEl=document.querySelector('.modal-hdr');
   var subEl=document.getElementById('modal-sub');

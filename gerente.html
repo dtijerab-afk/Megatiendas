@@ -302,17 +302,63 @@ async function sbLoad(){
   }catch(e){setStatus('err');}
 }
 async function syncNow(){await sbLoad();render();}
+
 async function sbToggle(id,di,on){
   pendingOps++;
   var s=cur,w=wkKey();
+  var k=ck(s,w,id,di);
+  var ok=false;
   try{
+    var resp;
     if(on){
-      await fetch(SB_URL+'/rest/v1/checks',{method:'POST',headers:sbH(),body:JSON.stringify({store:s,week:w,task_id:id,day_idx:di,done:true})});
+      resp=await fetch(SB_URL+'/rest/v1/checks',{
+        method:'POST',
+        headers:sbH(),
+        body:JSON.stringify({store:s,week:w,task_id:id,day_idx:di,done:true})
+      });
     }else{
-      await fetch(SB_URL+'/rest/v1/checks?store=eq.'+encodeURIComponent(s)+'&week=eq.'+encodeURIComponent(w)+'&task_id=eq.'+encodeURIComponent(id)+'&day_idx=eq.'+di,{method:'DELETE',headers:sbH()});
+      resp=await fetch(
+        SB_URL+'/rest/v1/checks?store=eq.'+encodeURIComponent(s)
+        +'&week=eq.'+encodeURIComponent(w)
+        +'&task_id=eq.'+encodeURIComponent(id)
+        +'&day_idx=eq.'+di,
+        {method:'DELETE',headers:sbH()}
+      );
     }
-  }catch(e){}
-  finally{pendingOps=Math.max(0,pendingOps-1);}
+    ok=(resp.status>=200&&resp.status<300);
+    /* Verificación extra: si fue POST, confirmar que quedó en Supabase */
+    if(ok&&on){
+      try{
+        var vr=await fetch(
+          SB_URL+'/rest/v1/checks?store=eq.'+encodeURIComponent(s)
+          +'&week=eq.'+encodeURIComponent(w)
+          +'&task_id=eq.'+encodeURIComponent(id)
+          +'&day_idx=eq.'+di
+          +'&done=eq.true&select=task_id',
+          {headers:sbH()}
+        );
+        var vd=await vr.json();
+        if(!vd||!vd.length){
+          /* No quedó guardado — revert */
+          delete checks[k];render();setStatus('err');
+          ok=false;
+        }
+      }catch(ve){}
+    }
+    /* Si Supabase rechazó la escritura — revert local */
+    if(!ok){
+      if(on){delete checks[k];}else{checks[k]=true;}
+      render();
+      setStatus('err');
+    }
+  }catch(e){
+    /* Error de red — revert local */
+    if(on){delete checks[k];}else{checks[k]=true;}
+    render();
+    setStatus('err');
+  }finally{
+    pendingOps=Math.max(0,pendingOps-1);
+  }
 }
 
 /* ═══════════════ ZONA / TIENDA ═══════════════ */

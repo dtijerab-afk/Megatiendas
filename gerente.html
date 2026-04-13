@@ -268,7 +268,7 @@ var GROUPS=['Administrativo','Comercial','Principal','Caja','Coordinadores'];
 var DAYS_ES=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 var MONTHS_ES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
-var curZone='Atlántico',cur='',checks={};
+var curZone='Atlántico',cur='',checks={},pendingOps=0;
 
 /* ═══════════════ HELPERS ═══════════════ */
 function sbH(){return{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'};}
@@ -290,10 +290,12 @@ function setStatus(st){
   if(dot)dot.style.background=v.c;if(txt)txt.textContent=v.m;
 }
 async function sbLoad(){
+  if(pendingOps>0){return;}  /* nunca pisar escrituras en vuelo */
   setStatus('sync');
   try{
     var r=await fetch(SB_URL+'/rest/v1/checks?select=*&done=eq.true',{headers:sbH()});
     var rows=await r.json();
+    if(pendingOps>0){return;}  /* volvió a haber escrituras mientras esperábamos */
     checks={};
     rows.forEach(function(row){checks[row.store+'|'+row.week+'|'+row.task_id+'|'+row.day_idx]=true;});
     setStatus('ok');
@@ -301,11 +303,16 @@ async function sbLoad(){
 }
 async function syncNow(){await sbLoad();render();}
 async function sbToggle(id,di,on){
+  pendingOps++;
   var s=cur,w=wkKey();
   try{
-    if(on){await fetch(SB_URL+'/rest/v1/checks',{method:'POST',headers:sbH(),body:JSON.stringify({store:s,week:w,task_id:id,day_idx:di,done:true})});}
-    else{await fetch(SB_URL+'/rest/v1/checks?store=eq.'+encodeURIComponent(s)+'&week=eq.'+encodeURIComponent(w)+'&task_id=eq.'+encodeURIComponent(id)+'&day_idx=eq.'+di,{method:'DELETE',headers:sbH()});}
+    if(on){
+      await fetch(SB_URL+'/rest/v1/checks',{method:'POST',headers:sbH(),body:JSON.stringify({store:s,week:w,task_id:id,day_idx:di,done:true})});
+    }else{
+      await fetch(SB_URL+'/rest/v1/checks?store=eq.'+encodeURIComponent(s)+'&week=eq.'+encodeURIComponent(w)+'&task_id=eq.'+encodeURIComponent(id)+'&day_idx=eq.'+di,{method:'DELETE',headers:sbH()});
+    }
   }catch(e){}
+  finally{pendingOps=Math.max(0,pendingOps-1);}
 }
 
 /* ═══════════════ ZONA / TIENDA ═══════════════ */

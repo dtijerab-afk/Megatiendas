@@ -342,7 +342,17 @@ var REM_INTERVAL=2*60*60*1000,nextRemTime=Date.now()+REM_INTERVAL;
 function getStores(){return ZONES[curZone].stores;}
 
 /* ═══════════════ SUPABASE ═══════════════ */
-function sbH(){return{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'};}
+function sbH(extra){
+  var h={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+  if(extra)Object.assign(h,extra);
+  return h;
+}
+function sbFilter(s,w,id,di){
+  return '?store=eq.'+encodeURIComponent(s)
+    +'&week=eq.'+encodeURIComponent(w)
+    +'&task_id=eq.'+encodeURIComponent(id)
+    +'&day_idx=eq.'+di;
+}
 
 function setStatus(st){
   var dot=document.getElementById('status-dot'),txt=document.getElementById('status-txt');
@@ -358,6 +368,7 @@ async function sbLoad(){
   setStatus('sync');
   try{
     var r1=await fetch(SB_URL+'/rest/v1/checks?select=*&done=eq.true',{headers:sbH()});
+    if(!r1.ok) throw new Error('checks load failed');
     var rows=await r1.json();
     checks={};
     rows.forEach(function(r){checks[r.store+'|'+r.week+'|'+r.task_id+'|'+r.day_idx]=true;});
@@ -369,17 +380,36 @@ async function sbLoad(){
   }catch(e){setStatus('err');return false;}
 }
 async function syncNow(){await sbLoad();render();}
+
 async function sbToggle(s,w,id,di,isDone){
   try{
-    if(isDone){await fetch(SB_URL+'/rest/v1/checks',{method:'POST',headers:sbH(),body:JSON.stringify({store:s,week:w,task_id:id,day_idx:di,done:true})});}
-    else{await fetch(SB_URL+'/rest/v1/checks?store=eq.'+encodeURIComponent(s)+'&week=eq.'+encodeURIComponent(w)+'&task_id=eq.'+encodeURIComponent(id)+'&day_idx=eq.'+di,{method:'DELETE',headers:sbH()});}
-  }catch(e){}
+    var filter=SB_URL+'/rest/v1/checks'+sbFilter(s,w,id,di);
+    /* Siempre borrar primero para evitar duplicados */
+    await fetch(filter,{method:'DELETE',headers:sbH({'Prefer':'return=minimal'})});
+    /* Si hay que marcar, insertar limpio */
+    if(isDone){
+      var ins=await fetch(SB_URL+'/rest/v1/checks',{
+        method:'POST',
+        headers:sbH({'Prefer':'return=representation'}),
+        body:JSON.stringify({store:s,week:w,task_id:id,day_idx:di,done:true})
+      });
+      if(!ins.ok) setStatus('err');
+    }
+  }catch(e){setStatus('err');}
 }
-async function sbReset(s,w){try{await fetch(SB_URL+'/rest/v1/checks?store=eq.'+encodeURIComponent(s)+'&week=eq.'+encodeURIComponent(w),{method:'DELETE',headers:sbH()});}catch(e){}}
+async function sbReset(s,w){
+  try{await fetch(SB_URL+'/rest/v1/checks?store=eq.'+encodeURIComponent(s)+'&week=eq.'+encodeURIComponent(w),{method:'DELETE',headers:sbH({'Prefer':'return=minimal'})});}catch(e){}
+}
 async function sbSaveObs(key,items){
   try{
-    await fetch(SB_URL+'/rest/v1/observations?obs_key=eq.'+encodeURIComponent(key),{method:'DELETE',headers:sbH()});
-    if(items.length>0){await fetch(SB_URL+'/rest/v1/observations',{method:'POST',headers:sbH(),body:JSON.stringify(items.map(function(it){return{obs_key:key,obs_id:it.id,date:it.date,text:it.text};}))});}
+    await fetch(SB_URL+'/rest/v1/observations?obs_key=eq.'+encodeURIComponent(key),{method:'DELETE',headers:sbH({'Prefer':'return=minimal'})});
+    if(items.length>0){
+      await fetch(SB_URL+'/rest/v1/observations',{
+        method:'POST',
+        headers:sbH({'Prefer':'return=representation'}),
+        body:JSON.stringify(items.map(function(it){return{obs_key:key,obs_id:it.id,date:it.date,text:it.text};}))
+      });
+    }
   }catch(e){}
 }
 

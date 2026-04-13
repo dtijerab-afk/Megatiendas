@@ -333,10 +333,13 @@ async function sbToggle(id,di,on){
         body:JSON.stringify({store:s,week:w,task_id:id,day_idx:di,done:true})
       });
       if(!ins.ok){
-        /* Inserción falló — revert local */
+        var errTxt=await ins.text().catch(function(){return'?';});
+        console.error('[Supabase] INSERT falló HTTP '+ins.status+':', errTxt);
+        var dot2=document.getElementById('sdot'),txt2=document.getElementById('stxt');
+        if(dot2)dot2.style.background='#F87171';
+        if(txt2)txt2.textContent='❌ HTTP '+ins.status+' — abre consola (F12)';
         delete checks[k];
         render();
-        setStatus('err');
       }
     }
   }catch(e){

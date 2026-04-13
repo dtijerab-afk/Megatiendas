@@ -271,7 +271,11 @@ var MONTHS_ES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto'
 var curZone='Atlántico',cur='',checks={},pendingOps=0;
 
 /* ═══════════════ HELPERS ═══════════════ */
-function sbH(){return{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'resolution=merge-duplicates'};}
+function sbH(extra){
+  var h={'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+  if(extra)Object.assign(h,extra);
+  return h;
+}
 function getMon(){var n=new Date(),dy=n.getDay(),diff=dy===0?-6:1-dy,m=new Date(n);m.setDate(n.getDate()+diff);m.setHours(0,0,0,0);return m;}
 function wkKey(){return getMon().toISOString().slice(0,10);}
 function todayDi(){var mon=getMon(),now=new Date();now.setHours(0,0,0,0);var d=Math.round((now-mon)/86400000);return(d>=0&&d<7)?d:-1;}
@@ -280,24 +284,33 @@ function isDone(id,di){return!!checks[ck(cur,wkKey(),id,di)];}
 function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function pcol(p){return p>=85?'#1D9E75':p>=60?'#EF9F27':'#E24B4A';}
 function pcls(p){return p>=85?'pg':p>=60?'pa':'pr';}
+function sbFilter(s,w,id,di){
+  return '?store=eq.'+encodeURIComponent(s)
+    +'&week=eq.'+encodeURIComponent(w)
+    +'&task_id=eq.'+encodeURIComponent(id)
+    +'&day_idx=eq.'+di;
+}
 
 /* ═══════════════ SUPABASE ═══════════════ */
 function setStatus(st){
   var dot=document.getElementById('sdot'),txt=document.getElementById('stxt');
   var now=new Date(),hh=now.getHours(),mm=now.getMinutes(),ts=(hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
-  var cfg={ok:{c:'#4ADE80',m:'✅ Sincronizado '+ts},sync:{c:'#FCD34D',m:'⏳ Sincronizando...'},err:{c:'#F87171',m:'❌ Error de conexión'}};
+  var cfg={ok:{c:'#4ADE80',m:'✅ Sincronizado '+ts},sync:{c:'#FCD34D',m:'⏳ Sincronizando...'},err:{c:'#F87171',m:'❌ Error — reintentando...'}};
   var v=cfg[st]||{c:'#aaa',m:'Sin conexión'};
   if(dot)dot.style.background=v.c;if(txt)txt.textContent=v.m;
 }
 async function sbLoad(){
-  if(pendingOps>0){return;}  /* nunca pisar escrituras en vuelo */
+  if(pendingOps>0){return;}
   setStatus('sync');
   try{
     var r=await fetch(SB_URL+'/rest/v1/checks?select=*&done=eq.true',{headers:sbH()});
+    if(!r.ok) throw new Error('load failed');
     var rows=await r.json();
-    if(pendingOps>0){return;}  /* volvió a haber escrituras mientras esperábamos */
+    if(pendingOps>0){return;}
     checks={};
-    rows.forEach(function(row){checks[row.store+'|'+row.week+'|'+row.task_id+'|'+row.day_idx]=true;});
+    rows.forEach(function(row){
+      checks[row.store+'|'+row.week+'|'+row.task_id+'|'+row.day_idx]=true;
+    });
     setStatus('ok');
   }catch(e){setStatus('err');}
 }
@@ -305,51 +318,26 @@ async function syncNow(){await sbLoad();render();}
 
 async function sbToggle(id,di,on){
   pendingOps++;
-  var s=cur,w=wkKey();
-  var k=ck(s,w,id,di);
-  var ok=false;
+  var s=cur,w=wkKey(),k=ck(s,w,id,di);
   try{
-    var resp;
+    var filter=SB_URL+'/rest/v1/checks'+sbFilter(s,w,id,di);
+
+    /* Paso 1: siempre borrar primero para evitar duplicados */
+    await fetch(filter,{method:'DELETE',headers:sbH({'Prefer':'return=minimal'})});
+
+    /* Paso 2: si hay que marcar, insertar limpio */
     if(on){
-      resp=await fetch(SB_URL+'/rest/v1/checks',{
+      var ins=await fetch(SB_URL+'/rest/v1/checks',{
         method:'POST',
-        headers:sbH(),
+        headers:sbH({'Prefer':'return=representation'}),
         body:JSON.stringify({store:s,week:w,task_id:id,day_idx:di,done:true})
       });
-    }else{
-      resp=await fetch(
-        SB_URL+'/rest/v1/checks?store=eq.'+encodeURIComponent(s)
-        +'&week=eq.'+encodeURIComponent(w)
-        +'&task_id=eq.'+encodeURIComponent(id)
-        +'&day_idx=eq.'+di,
-        {method:'DELETE',headers:sbH()}
-      );
-    }
-    ok=(resp.status>=200&&resp.status<300);
-    /* Verificación extra: si fue POST, confirmar que quedó en Supabase */
-    if(ok&&on){
-      try{
-        var vr=await fetch(
-          SB_URL+'/rest/v1/checks?store=eq.'+encodeURIComponent(s)
-          +'&week=eq.'+encodeURIComponent(w)
-          +'&task_id=eq.'+encodeURIComponent(id)
-          +'&day_idx=eq.'+di
-          +'&done=eq.true&select=task_id',
-          {headers:sbH()}
-        );
-        var vd=await vr.json();
-        if(!vd||!vd.length){
-          /* No quedó guardado — revert */
-          delete checks[k];render();setStatus('err');
-          ok=false;
-        }
-      }catch(ve){}
-    }
-    /* Si Supabase rechazó la escritura — revert local */
-    if(!ok){
-      if(on){delete checks[k];}else{checks[k]=true;}
-      render();
-      setStatus('err');
+      if(!ins.ok){
+        /* Inserción falló — revert local */
+        delete checks[k];
+        render();
+        setStatus('err');
+      }
     }
   }catch(e){
     /* Error de red — revert local */

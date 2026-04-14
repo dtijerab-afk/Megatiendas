@@ -303,12 +303,21 @@ async function sbLoad(){
   if(pendingOps>0){return;}
   setStatus('sync');
   try{
-    var r=await fetch(SB_URL+'/rest/v1/checks?select=*&done=eq.true',{headers:sbH()});
-    if(!r.ok) throw new Error('load failed');
-    var rows=await r.json();
+    /* Traer TODOS los checks paginando de 1000 en 1000 */
+    var allRows=[],offset=0,pageSize=1000,done=false;
+    while(!done){
+      var r=await fetch(
+        SB_URL+'/rest/v1/checks?select=*&done=eq.true&limit='+pageSize+'&offset='+offset,
+        {headers:sbH({'Range-Unit':'items','Range':offset+'-'+(offset+pageSize-1)})}
+      );
+      if(!r.ok) throw new Error('load failed');
+      var page=await r.json();
+      allRows=allRows.concat(page);
+      if(page.length<pageSize){done=true;}else{offset+=pageSize;}
+    }
     if(pendingOps>0){return;}
     checks={};
-    rows.forEach(function(row){
+    allRows.forEach(function(row){
       checks[row.store+'|'+row.week+'|'+row.task_id+'|'+row.day_idx]=true;
     });
     setStatus('ok');

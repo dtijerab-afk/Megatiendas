@@ -336,7 +336,7 @@ var TASKS=[
 var GROUPS=['Administrativo','Comercial','Principal','Caja','Coordinadores'];
 
 /* ═══════════════ ESTADO ═══════════════ */
-var curZone='Atlántico',cur='UNICO',wkOff=0,checks={},obsData={},sTab=0,CHS={};
+var curZone='Atlántico',cur='UNICO',wkOff=0,checks={},obsData={},sTab=0,CHS={},pendingOps=0;
 var REM_INTERVAL=2*60*60*1000,nextRemTime=Date.now()+REM_INTERVAL;
 
 function getStores(){return ZONES[curZone].stores;}
@@ -365,14 +365,25 @@ function setStatus(st){
 }
 
 async function sbLoad(){
+  if(pendingOps>0){return;}
   setStatus('sync');
   try{
-    var r1=await fetch(SB_URL+'/rest/v1/checks?select=*&done=eq.true',{headers:sbH()});
-    if(!r1.ok) throw new Error('checks load failed');
-    var rows=await r1.json();
+    /* Traer TODOS los checks paginando de 1000 en 1000 */
+    var allRows=[],offset=0,pageSize=1000,allDone=false;
+    while(!allDone){
+      var r1=await fetch(
+        SB_URL+'/rest/v1/checks?select=*&done=eq.true&limit='+pageSize+'&offset='+offset,
+        {headers:sbH({'Range-Unit':'items','Range':offset+'-'+(offset+pageSize-1)})}
+      );
+      if(!r1.ok) throw new Error('checks load failed');
+      var page=await r1.json();
+      allRows=allRows.concat(page);
+      if(page.length<pageSize){allDone=true;}else{offset+=pageSize;}
+    }
+    if(pendingOps>0){return;}  /* escritura en vuelo — no pisar */
     checks={};
-    rows.forEach(function(r){checks[r.store+'|'+r.week+'|'+r.task_id+'|'+r.day_idx]=true;});
-    var r2=await fetch(SB_URL+'/rest/v1/observations?select=*',{headers:sbH()});
+    allRows.forEach(function(r){checks[r.store+'|'+r.week+'|'+r.task_id+'|'+r.day_idx]=true;});
+    var r2=await fetch(SB_URL+'/rest/v1/observations?select=*&limit=5000',{headers:sbH()});
     var orows=await r2.json();
     obsData={};
     orows.forEach(function(r){if(!obsData[r.obs_key])obsData[r.obs_key]=[];obsData[r.obs_key].push({id:r.obs_id,date:r.date,text:r.text});});
@@ -382,6 +393,7 @@ async function sbLoad(){
 async function syncNow(){await sbLoad();render();}
 
 async function sbToggle(s,w,id,di,isDone){
+  pendingOps++;
   try{
     var filter=SB_URL+'/rest/v1/checks'+sbFilter(s,w,id,di);
     /* Siempre borrar primero para evitar duplicados */
@@ -396,6 +408,7 @@ async function sbToggle(s,w,id,di,isDone){
       if(!ins.ok) setStatus('err');
     }
   }catch(e){setStatus('err');}
+  finally{pendingOps=Math.max(0,pendingOps-1);}
 }
 async function sbReset(s,w){
   try{await fetch(SB_URL+'/rest/v1/checks?store=eq.'+encodeURIComponent(s)+'&week=eq.'+encodeURIComponent(w),{method:'DELETE',headers:sbH({'Prefer':'return=minimal'})});}catch(e){}

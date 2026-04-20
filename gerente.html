@@ -133,7 +133,7 @@ body{font-family:system-ui,sans-serif;background:#f0f4f8;color:#1a1a1a;min-heigh
   <!-- HEADER -->
   <div class="hdr">
     <div class="hdr-brand">📋 MEGATIENDAS — VISTA GERENTE</div>
-    <div class="hdr-title">Actividades de hoy</div>
+    <div class="hdr-title" id="hdr-title">Actividades de hoy</div>
 
     <!-- Zona -->
     <div class="zona-row">
@@ -148,6 +148,13 @@ body{font-family:system-ui,sans-serif;background:#f0f4f8;color:#1a1a1a;min-heigh
       <select class="store-sel" id="ssel" onchange="setStore(this.value)"></select>
     </div>
 
+    <!-- Navegación semana -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.5rem;gap:8px">
+      <button class="sync-btn" onclick="chWk(-1)" style="font-size:16px;padding:4px 12px">‹</button>
+      <span id="wk-lbl" style="font-size:12px;font-weight:700;color:rgba(255,255,255,.85);text-align:center;flex:1"></span>
+      <button class="sync-btn" id="wk-next-btn" onclick="chWk(1)" style="font-size:16px;padding:4px 12px">›</button>
+    </div>
+
     <!-- Status -->
     <div class="status-row">
       <div class="dot" id="sdot" style="background:#aaa"></div>
@@ -156,7 +163,12 @@ body{font-family:system-ui,sans-serif;background:#f0f4f8;color:#1a1a1a;min-heigh
     </div>
   </div>
 
-  <!-- HOY -->
+  <!-- BANNER SOLO LECTURA (semanas anteriores) -->
+  <div id="readonly-banner" style="display:none;background:#FAEEDA;border:1px solid #F0C97A;border-radius:10px;padding:8px 14px;margin-bottom:.75rem;font-size:12px;font-weight:700;color:#854F0B;text-align:center">
+    👁 Semana anterior — solo lectura
+  </div>
+
+  <!-- HOY / SEMANA -->
   <div class="today-card" id="today-card">
     <div>
       <div class="today-date" id="today-date">—</div>
@@ -164,7 +176,7 @@ body{font-family:system-ui,sans-serif;background:#f0f4f8;color:#1a1a1a;min-heigh
     </div>
     <div class="today-pct-wrap">
       <div class="today-pct" id="today-pct" style="color:#185FA5">—</div>
-      <div class="today-pct-lbl">cumplimiento hoy</div>
+      <div class="today-pct-lbl" id="today-pct-lbl">cumplimiento hoy</div>
     </div>
     <div style="width:100%">
       <div class="today-bar"><div class="today-bar-fill" id="today-bar-fill"></div></div>
@@ -268,7 +280,7 @@ var GROUPS=['Administrativo','Comercial','Principal','Caja','Coordinadores'];
 var DAYS_ES=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 var MONTHS_ES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
-var curZone='Atlántico',cur='',checks={},pendingOps=0;
+var curZone='Atlántico',cur='',checks={},pendingOps=0,wkOff=0;
 
 /* ═══════════════ HELPERS ═══════════════ */
 function sbH(extra){
@@ -276,11 +288,27 @@ function sbH(extra){
   if(extra)Object.assign(h,extra);
   return h;
 }
-function getMon(){var n=new Date(),dy=n.getDay(),diff=dy===0?-6:1-dy,m=new Date(n);m.setDate(n.getDate()+diff);m.setHours(0,0,0,0);return m;}
-function wkKey(){return getMon().toISOString().slice(0,10);}
-function todayDi(){var mon=getMon(),now=new Date();now.setHours(0,0,0,0);var d=Math.round((now-mon)/86400000);return(d>=0&&d<7)?d:-1;}
+function getMon(off){
+  var n=new Date(),dy=n.getDay(),diff=dy===0?-6:1-dy,m=new Date(n);
+  m.setDate(n.getDate()+diff+(off!==undefined?off:wkOff)*7);
+  m.setHours(0,0,0,0);return m;
+}
+function wkKey(off){return getMon(off!==undefined?off:wkOff).toISOString().slice(0,10);}
+function isCurrentWeek(){return wkOff===0;}
+function todayDi(){
+  /* Solo relevante en la semana actual */
+  if(!isCurrentWeek()) return -1;
+  var mon=getMon(0),now=new Date();now.setHours(0,0,0,0);
+  var d=Math.round((now-mon)/86400000);
+  return(d>=0&&d<7)?d:-1;
+}
+function fmt(d){var m=d.getMonth()+1;return d.getDate()+'/'+(m<10?'0':'')+m;}
 function ck(s,w,id,di){return s+'|'+w+'|'+id+'|'+di;}
 function isDone(id,di){return!!checks[ck(cur,wkKey(),id,di)];}
+function chWk(dir){
+  if(dir>0&&wkOff>=0)return;  /* no ir al futuro */
+  wkOff+=dir;render();
+}
 function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 function pcol(p){return p>=85?'#1D9E75':p>=60?'#EF9F27':'#E24B4A';}
 function pcls(p){return p>=85?'pg':p>=60?'pa':'pr';}
@@ -387,26 +415,48 @@ function tog(id,di){
 
 /* ═══════════════ RENDER ═══════════════ */
 function render(){
-  var tdi=todayDi(),w=wkKey();
+  var w=wkKey(),mon=getMon(),tdi=todayDi();
+  var isCurrent=isCurrentWeek();
   var now=new Date();
 
-  // Today card
-  var dayName=DAYS_ES[now.getDay()];
-  var dateStr=now.getDate()+' de '+MONTHS_ES[now.getMonth()]+' '+now.getFullYear();
-  var dateEl=document.getElementById('today-date');
-  var dayEl=document.getElementById('today-day');
-  if(dateEl)dateEl.textContent=dateStr;
-  if(dayEl)dayEl.textContent=dayName;
+  // Etiqueta semana en header
+  var sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  var wkLbl=isCurrent?'Semana actual':fmt(mon)+' → '+fmt(sun)+' '+sun.getFullYear();
+  var wlEl=document.getElementById('wk-lbl');if(wlEl)wlEl.textContent=wkLbl;
+  var nextBtn=document.getElementById('wk-next-btn');
+  if(nextBtn)nextBtn.style.opacity=wkOff>=0?'0.3':'1';
 
-  // Métricas semanales (todos los días)
+  // Título header
+  var hdrT=document.getElementById('hdr-title');
+  if(hdrT)hdrT.textContent=isCurrent?'Actividades de hoy':'Semana: '+fmt(mon)+' — '+fmt(sun);
+
+  // Banner solo lectura
+  var banner=document.getElementById('readonly-banner');
+  if(banner)banner.style.display=isCurrent?'none':'block';
+
+  // Today card
+  if(isCurrent){
+    var dayName=DAYS_ES[now.getDay()];
+    var dateStr=now.getDate()+' de '+MONTHS_ES[now.getMonth()]+' '+now.getFullYear();
+    var dateEl=document.getElementById('today-date');if(dateEl)dateEl.textContent=dateStr;
+    var dayEl=document.getElementById('today-day');if(dayEl)dayEl.textContent=dayName;
+    var lbl=document.getElementById('today-pct-lbl');if(lbl)lbl.textContent='cumplimiento hoy';
+  }else{
+    var dateEl=document.getElementById('today-date');if(dateEl)dateEl.textContent=fmt(mon)+' – '+fmt(sun);
+    var dayEl=document.getElementById('today-day');if(dayEl)dayEl.textContent=sun.getFullYear();
+    var lbl=document.getElementById('today-pct-lbl');if(lbl)lbl.textContent='cumplimiento semana';
+  }
+
+  // Métricas semanales — toda la semana
   var wkTot=0,wkDn=0,wkMiss=0,wkHDn=0,wkHPnd=0;
   TASKS.forEach(function(tk){
     tk.d.forEach(function(di){
       wkTot++;
       var ok=isDone(tk.id,di);
       if(ok) wkDn++;
-      else if(tdi>=0&&di<tdi) wkMiss++;
-      if(di===tdi){ok?wkHDn++:wkHPnd++;}
+      else if(isCurrent&&tdi>=0&&di<tdi) wkMiss++;
+      else if(!isCurrent) wkMiss++;
+      if(isCurrent&&di===tdi){ok?wkHDn++:wkHPnd++;}
     });
   });
   var wkP=wkTot?Math.round(wkDn/wkTot*100):0;
@@ -424,7 +474,6 @@ function render(){
         +'<div class="gmet-v" style="color:'+x.c+'">'+x.v+'</div>'
         +'<div class="gmet-l">'+x.l+'</div></div>';
     }).join('');
-    // 6ta tarjeta — % grande
     mHtml+='<div class="gmet gmet-pct gmet-bg-pct" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">'
       +'<div class="gmet-pct-big" style="color:'+pcol(wkP)+'">'+wkP+'%</div>'
       +'<div class="gmet-l">Cumplimiento</div>'
@@ -436,55 +485,91 @@ function render(){
   var gsn=document.getElementById('g-store-name');if(gsn)gsn.textContent=cur;
   var gpf=document.getElementById('g-wk-pf');if(gpf)gpf.style.cssText='width:'+wkP+'%;background:'+pcol(wkP);
   var gpv=document.getElementById('g-wk-pv');
-  if(gpv)gpv.innerHTML='<b>'+wkDn+'</b>/'+wkTot+' <span style="display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;'+( wkP>=85?'background:#E1F5EE;color:#0F6E56':wkP>=60?'background:#FAEEDA;color:#854F0B':'background:#FCEBEB;color:#A32D2D')+'">'+wkP+'%</span>';
+  if(gpv)gpv.innerHTML='<b>'+wkDn+'</b>/'+wkTot+' <span style="display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;'+(wkP>=85?'background:#E1F5EE;color:#0F6E56':wkP>=60?'background:#FAEEDA;color:#854F0B':'background:#FCEBEB;color:#A32D2D')+'">'+wkP+'%</span>';
 
-  // Tasks for today
-  if(tdi<0){
-    document.getElementById('task-list').innerHTML='<div class="empty"><div class="empty-icon">📅</div><div class="empty-msg">No hay actividades para hoy.<br>La semana va de lunes a domingo.</div></div>';
-    var tp=document.getElementById('today-pct');if(tp){tp.textContent='—';tp.style.color='#aaa';}
-    var bf=document.getElementById('today-bar-fill');if(bf)bf.style.cssText='width:0%;background:#aaa';
-    return;
+  // Today % (barra superior)
+  if(isCurrent&&tdi>=0){
+    var todayT=TASKS.filter(function(tk){return tk.d.indexOf(tdi)>=0;});
+    var tDn=todayT.filter(function(tk){return isDone(tk.id,tdi);}).length;
+    var tP=todayT.length?Math.round(tDn/todayT.length*100):0;
+    var tp=document.getElementById('today-pct');if(tp){tp.textContent=tP+'%';tp.style.color=pcol(tP);}
+    var bf=document.getElementById('today-bar-fill');if(bf)bf.style.cssText='width:'+tP+'%;background:'+pcol(tP);
+  }else{
+    var tp=document.getElementById('today-pct');if(tp){tp.textContent=wkP+'%';tp.style.color=pcol(wkP);}
+    var bf=document.getElementById('today-bar-fill');if(bf)bf.style.cssText='width:'+wkP+'%;background:'+pcol(wkP);
   }
 
-  var todayTasks=TASKS.filter(function(tk){return tk.d.indexOf(tdi)>=0;});
-  var dn=todayTasks.filter(function(tk){return isDone(tk.id,tdi);}).length;
-  var tot=todayTasks.length;
-  var p=tot?Math.round(dn/tot*100):0;
-
-  // Progress
-  var tp=document.getElementById('today-pct');
-  if(tp){tp.textContent=p+'%';tp.style.color=pcol(p);}
-  var bf=document.getElementById('today-bar-fill');
-  if(bf)bf.style.cssText='width:'+p+'%;background:'+pcol(p);
-
-  if(!todayTasks.length){
-    document.getElementById('task-list').innerHTML='<div class="empty"><div class="empty-icon">✨</div><div class="empty-msg">No hay tareas programadas para hoy.</div></div>';
-    return;
-  }
-
-  var html='';
-  GROUPS.forEach(function(g){
-    var gt=todayTasks.filter(function(tk){return tk.g===g;});
-    if(!gt.length)return;
-    var gdn=gt.filter(function(tk){return isDone(tk.id,tdi);}).length;
-    var gp=gt.length?Math.round(gdn/gt.length*100):null;
-    html+='<div class="grp-hdr">'+g+(gp!==null?'<span class="grp-pct '+pcls(gp)+'">'+gp+'%</span>':'')+'</div>';
-    gt.forEach(function(tk){
-      var ok=isDone(tk.id,tdi);
-      // missed = not done and today has passed (handled as tdi = today so never "missed" in this view, just pending)
-      var cls=ok?' done':'';
-      html+='<div class="task-card'+cls+'" onclick="tog(\''+tk.id+'\','+tdi+')">'
-        +'<div class="chk">'+(ok?'✓':'')+'</div>'
-        +'<div class="task-info">'
-        +'<div class="task-name">'+esc(tk.t)+'</div>'
-        +'<div class="task-resp"><span class="bdg '+tk.rc+'">'+tk.r+'</span></div>'
-        +'</div>'
-        +'</div>';
+  // Lista de tareas
+  if(isCurrent){
+    // Semana actual → solo tareas de hoy, marcables
+    if(tdi<0){
+      document.getElementById('task-list').innerHTML='<div class="empty"><div class="empty-icon">📅</div><div class="empty-msg">No hay actividades para hoy.<br>La semana va de lunes a domingo.</div></div>';
+      renderBadge();return;
+    }
+    var todayTasks=TASKS.filter(function(tk){return tk.d.indexOf(tdi)>=0;});
+    if(!todayTasks.length){
+      document.getElementById('task-list').innerHTML='<div class="empty"><div class="empty-icon">✨</div><div class="empty-msg">No hay tareas programadas para hoy.</div></div>';
+      renderBadge();return;
+    }
+    var html='';
+    GROUPS.forEach(function(g){
+      var gt=todayTasks.filter(function(tk){return tk.g===g;});
+      if(!gt.length)return;
+      var gdn=gt.filter(function(tk){return isDone(tk.id,tdi);}).length;
+      var gp=gt.length?Math.round(gdn/gt.length*100):null;
+      html+='<div class="grp-hdr">'+g+(gp!==null?'<span class="grp-pct '+pcls(gp)+'">'+gp+'%</span>':'')+'</div>';
+      gt.forEach(function(tk){
+        var ok=isDone(tk.id,tdi);
+        html+='<div class="task-card'+(ok?' done':'')+'" onclick="tog(\''+tk.id+'\','+tdi+')">'
+          +'<div class="chk">'+(ok?'✓':'')+'</div>'
+          +'<div class="task-info"><div class="task-name">'+esc(tk.t)+'</div>'
+          +'<div class="task-resp"><span class="bdg '+tk.rc+'">'+tk.r+'</span></div></div></div>';
+      });
     });
-  });
+    document.getElementById('task-list').innerHTML=html;
+    renderBadge();
 
-  document.getElementById('task-list').innerHTML=html;
-  renderBadge();
+  }else{
+    // Semana anterior → todas las tareas, solo lectura, con estado por día
+    var DSS=['L','M','X','J','V','S','D'];
+    var html='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:380px;font-size:11px">'
+      +'<thead><tr>'
+      +'<th style="background:#E6F1FB;color:#042C53;font-size:11px;font-weight:800;padding:6px 4px 6px 10px;text-align:left;border-bottom:2px solid #B5D4F4;min-width:160px">Tarea</th>';
+    for(var di=0;di<7;di++){
+      var dt=new Date(mon);dt.setDate(mon.getDate()+di);
+      html+='<th style="background:#E6F1FB;color:#185FA5;font-size:10px;font-weight:800;padding:5px 3px;text-align:center;border-bottom:2px solid #B5D4F4;white-space:nowrap">'+DSS[di]+'<br>'+dt.getDate()+'</th>';
+    }
+    html+='<th style="background:#E6F1FB;color:#185FA5;font-size:10px;font-weight:800;padding:5px;text-align:center;border-bottom:2px solid #B5D4F4">%</th></tr></thead><tbody>';
+
+    GROUPS.forEach(function(g){
+      var gt=TASKS.filter(function(tk){return tk.g===g;});if(!gt.length)return;
+      var gTot=0,gDn=0;
+      gt.forEach(function(tk){tk.d.forEach(function(di){gTot++;if(isDone(tk.id,di))gDn++;});});
+      var gp=gTot?Math.round(gDn/gTot*100):null;
+      html+='<tr><td colspan="9" style="background:#E6F1FB;padding:4px 10px;font-size:10px;font-weight:800;color:#042C53;text-transform:uppercase;letter-spacing:.4px">'+g+(gp!==null?'<span style="display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;margin-left:6px;'+(gp>=85?'background:#E1F5EE;color:#0F6E56':gp>=60?'background:#FAEEDA;color:#854F0B':'background:#FCEBEB;color:#A32D2D')+'">'+gp+'%</span>':'')+'</td></tr>';
+      gt.forEach(function(tk){
+        var tTot=0,tDn=0;
+        tk.d.forEach(function(di){tTot++;if(isDone(tk.id,di))tDn++;});
+        var tp=tTot?Math.round(tDn/tTot*100):null;
+        html+='<tr style="border-bottom:0.5px solid #eee"><td style="font-size:11px;font-weight:600;padding:5px 4px 5px 10px;color:#222;line-height:1.3">'+esc(tk.t)+'</td>';
+        for(var di=0;di<7;di++){
+          if(tk.d.indexOf(di)<0){
+            html+='<td style="text-align:center;padding:3px 2px"></td>';
+          }else{
+            var ok=isDone(tk.id,di);
+            var bg=ok?'background:#1D9E75':'background:#E24B4A';
+            var icon=ok?'✓':'✕';
+            html+='<td style="text-align:center;padding:3px 2px;vertical-align:middle">'
+              +'<div style="width:22px;height:22px;border-radius:4px;'+bg+';color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto">'+icon+'</div></td>';
+          }
+        }
+        html+='<td style="text-align:center;padding:3px 5px">'+(tp!==null?'<span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px;'+(tp>=85?'background:#E1F5EE;color:#0F6E56':tp>=60?'background:#FAEEDA;color:#854F0B':'background:#FCEBEB;color:#A32D2D')+'">'+tp+'%</span>':'')+'</td></tr>';
+      });
+    });
+    html+='</tbody></table></div>';
+    document.getElementById('task-list').innerHTML=html;
+    renderBadge();
+  }
 }
 
 /* ═══════════════ BADGE DEL BOTÓN ═══════════════ */

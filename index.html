@@ -204,7 +204,7 @@ tfoot td:first-child{text-align:left;padding-left:12px;color:#042C53;font-size:1
     </div>
     <div class="acon" id="acon"></div>
   </div>
-  <!-- Resumen por tienda -->
+  <!-- Resumen por tienda (cards) -->
   <div style="background:#fff;border:1px solid #B5D4F4;border-radius:12px;overflow:hidden;margin-bottom:1rem">
     <div style="background:#E6F1FB;padding:.5rem 1rem;border-bottom:1.5px solid #B5D4F4;display:flex;align-items:center;justify-content:space-between">
       <span style="font-size:12px;font-weight:800;color:#042C53">Resumen por tienda — semana actual — <span id="res-zona-lbl"></span></span>
@@ -214,17 +214,19 @@ tfoot td:first-child{text-align:left;padding-left:12px;color:#042C53;font-size:1
       <div class="res-grid-wrap"><div id="res-grid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px"></div></div>
     </div>
   </div>
-  <!-- Observaciones -->
-  <div class="obs">
-    <div class="obs-hdr"><span class="obs-ht">📝 Observaciones</span><button class="obs-add" onclick="addObs()">+ Agregar</button></div>
-    <div class="obs-body" id="obsb"></div>
-  </div>
-  <div class="status-timer">
-    <div style="display:flex;align-items:center;gap:7px">
-      <div class="dot" style="background:#1D9E75;animation:blink 1.5s infinite"></div>
-      <span style="font-size:12px;color:#888">Recordatorio cada 2 h — próximo: <b id="next-rem">—</b></span>
+  <!-- TABLA RESUMEN SEMANAL POR TIENDA -->
+  <div style="background:#fff;border:1px solid #B5D4F4;border-radius:12px;overflow:hidden;margin-bottom:1rem">
+    <div style="background:#E6F1FB;padding:.5rem 1rem;border-bottom:1.5px solid #B5D4F4;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:12px;font-weight:800;color:#042C53">Cumplimiento semanal por tienda — <span id="tbl-zona-lbl"></span></span>
+      <span style="font-size:11px;color:#185FA5" id="tbl-wk-lbl"></span>
     </div>
-    <button class="rem-dismiss" style="padding:5px 11px;font-size:11px" onclick="triggerReminder()">⏰ Ver ahora</button>
+    <div style="overflow-x:auto">
+      <table id="tbl-zona" style="width:100%;border-collapse:collapse;min-width:600px;font-size:11px">
+        <thead id="tbl-zona-head"></thead>
+        <tbody id="tbl-zona-body"></tbody>
+        <tfoot id="tbl-zona-foot"></tfoot>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -258,11 +260,6 @@ tfoot td:first-child{text-align:left;padding-left:12px;color:#042C53;font-size:1
     <button class="mv-btn r" onclick="resetWk()">↺ Limpiar</button>
   </div>
   <div id="mlist"></div>
-  <div class="obs" style="margin-top:.625rem">
-    <div class="obs-hdr"><span class="obs-ht">📝 Observaciones</span></div>
-    <div class="obs-body" id="mobsb"></div>
-    <div style="padding:0 .875rem .875rem"><button class="obs-add" style="width:100%" onclick="addObs()">+ Agregar observación</button></div>
-  </div>
 </div>
 </div>
 
@@ -610,22 +607,112 @@ function render(){
     });
     ml.innerHTML=h4;
   }
-  renderObs();renderSum();
+  renderZonaTable();renderSum();
 }
 
-/* ═══════════════ OBSERVACIONES ═══════════════ */
-function obsKey(){return cur+'|'+wkKey();}
-function getObs(){return obsData[obsKey()]||[];}
-function saveObs(arr){obsData[obsKey()]=arr;sbSaveObs(obsKey(),arr);}
-function addObs(){var arr=getObs(),t=new Date(),m=t.getMonth()+1;arr.push({id:String(Date.now()),date:t.getDate()+'/'+(m<10?'0':'')+m+'/'+t.getFullYear(),text:''});saveObs(arr);renderObs();setTimeout(function(){var els=document.querySelectorAll('.obs-ta');if(els.length)els[els.length-1].focus();},50);}
-function delObs(id){saveObs(getObs().filter(function(o){return o.id!==String(id);}));renderObs();}
-function updObs(id,val){var arr=getObs();var o=arr.find(function(x){return String(x.id)===String(id);});if(o)o.text=val;saveObs(arr);}
-function renderObs(){
-  var arr=getObs();
-  var em='<div class="obs-em">Sin observaciones para esta semana.</div>';
-  var rows=arr.map(function(o){return'<div class="obs-row"><div class="obs-d">'+o.date+'</div><textarea class="obs-ta" placeholder="Escribe tu observación..." onchange="updObs('+o.id+',this.value)">'+esc(o.text)+'</textarea><button class="obs-x" onclick="delObs('+o.id+')">✕</button></div>';}).join('');
-  var ob=document.getElementById('obsb');if(ob)ob.innerHTML=arr.length?rows:em;
-  var mob=document.getElementById('mobsb');if(mob)mob.innerHTML=arr.length?rows:em;
+
+/* ═══════════════ TABLA RESUMEN SEMANAL POR TIENDA ═══════════════ */
+function renderZonaTable(){
+  var w=wkKey(),tdi=todayDi(),mon=getMon(wkOff);
+  var sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  var stores=getStores();
+  var DSS=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+
+  // Labels
+  var zl=document.getElementById('tbl-zona-lbl');
+  if(zl)zl.textContent=(ZONES[curZone].icon||'')+' '+curZone;
+  var wl=document.getElementById('tbl-wk-lbl');
+  if(wl)wl.textContent=fmt(mon)+' → '+fmt(sun)+' '+sun.getFullYear();
+
+  // Cabecera
+  var thead='<tr>'
+    +'<th style="background:#042C53;color:#B5D4F4;font-size:11px;font-weight:800;padding:7px 5px 7px 12px;text-align:left;min-width:150px;position:sticky;left:0;z-index:5">Tienda</th>';
+  AD.forEach(function(di){
+    var dt=new Date(mon);dt.setDate(mon.getDate()+di);
+    var isToday=(di===tdi);var isPast=tdi>=0&&di<tdi;
+    var bg=isToday?'#C0392B':'#042C53';var color=isToday?'#FFC9C9':'#B5D4F4';
+    thead+='<th style="background:'+bg+';color:'+color+';font-size:10px;font-weight:800;padding:6px 3px;text-align:center;white-space:nowrap">'
+      +DSS[di]+'<br><span style="font-size:9px;opacity:.8">'+dt.getDate()+'</span></th>';
+  });
+  thead+='<th style="background:#0C447C;color:#B5D4F4;font-size:11px;font-weight:800;padding:7px 10px;text-align:center;min-width:55px">Total</th>'
+    +'</tr>';
+  document.getElementById('tbl-zona-head').innerHTML=thead;
+
+  // Filas por tienda
+  var tbody='';
+  var zoneTotals=Array(7).fill(0).map(function(){return{dn:0,tot:0};});
+  var zoneTotal={dn:0,tot:0};
+
+  stores.forEach(function(s,si){
+    var sColor=SCOL[s]||'#888';
+    var rowTot=0,rowDn=0;
+    var daysCells='';
+    AD.forEach(function(di){
+      var dp=pct(s,w,TASKS,[di]);
+      var isToday=(di===tdi);var isPast=tdi>=0&&di<tdi;
+      var bg=isToday?'rgba(192,57,43,.04)':'';
+      // acumular zona
+      TASKS.forEach(function(tk){
+        if(tk.d.indexOf(di)>=0){
+          zoneTotals[di].tot++;
+          if(done(s,w,tk.id,di))zoneTotals[di].dn++;
+        }
+      });
+      var cellContent='';
+      if(dp===null){
+        cellContent='<span style="color:#ccc;font-size:9px">—</span>';
+      }else if(!isPast&&!isToday){
+        cellContent='<span style="color:#ccc;font-size:9px">·</span>';
+      }else{
+        var pillBg=dp>=85?'#E1F5EE':dp>=60?'#FAEEDA':'#FCEBEB';
+        var pillC=dp>=85?'#0F6E56':dp>=60?'#854F0B':'#A32D2D';
+        cellContent='<span style="display:inline-block;font-size:10px;font-weight:800;padding:2px 5px;border-radius:6px;background:'+pillBg+';color:'+pillC+'">'+dp+'%</span>';
+      }
+      daysCells+='<td style="text-align:center;padding:4px 2px;'+(bg?'background:'+bg:'')+'">'+cellContent+'</td>';
+    });
+    // total tienda
+    var sp=pct(s,w,TASKS,AD);
+    var spv=sp!==null?sp:0;
+    var spBg=spv>=85?'#E1F5EE':spv>=60?'#FAEEDA':'#FCEBEB';
+    var spC=spv>=85?'#0F6E56':spv>=60?'#854F0B':'#A32D2D';
+    // acumular zona total
+    TASKS.forEach(function(tk){tk.d.forEach(function(di){
+      zoneTotal.tot++;
+      if(done(s,w,tk.id,di))zoneTotal.dn++;
+    });});
+    var rowBg=si%2===0?'#fff':'#f8fafd';
+    tbody+='<tr style="border-bottom:0.5px solid #e5ecf4;background:'+rowBg+'">'
+      +'<td style="padding:5px 5px 5px 12px;font-size:11px;font-weight:700;color:'+sColor+';white-space:nowrap;position:sticky;left:0;background:'+rowBg+';border-right:2px solid '+sColor+'20">'
+      +'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+sColor+';margin-right:5px;vertical-align:middle"></span>'+s+'</td>'
+      +daysCells
+      +'<td style="text-align:center;padding:4px 8px">'
+      +'<span style="display:inline-block;font-size:11px;font-weight:800;padding:3px 8px;border-radius:8px;background:'+spBg+';color:'+spC+'">'+spv+'%</span></td>'
+      +'</tr>';
+  });
+  document.getElementById('tbl-zona-body').innerHTML=tbody;
+
+  // Pie — promedio zona por día
+  var tfoot='<tr style="border-top:2px solid #B5D4F4">'
+    +'<td style="background:#E6F1FB;padding:5px 5px 5px 12px;font-size:11px;font-weight:800;color:#042C53;position:sticky;left:0">Zona</td>';
+  AD.forEach(function(di){
+    var zd=zoneTotals[di];
+    var zp=zd.tot?Math.round(zd.dn/zd.tot*100):null;
+    var isToday=(di===tdi);var isPast=tdi>=0&&di<tdi;
+    var bg=isToday?'rgba(192,57,43,.06)':'#E6F1FB';
+    var cell='';
+    if(zp!==null&&(isPast||isToday)){
+      var c=zp>=85?'#0F6E56':zp>=60?'#854F0B':'#A32D2D';
+      cell='<span style="font-size:10px;font-weight:800;color:'+c+'">'+zp+'%</span>';
+    }else{cell='<span style="color:#ccc;font-size:9px">—</span>';}
+    tfoot+='<td style="background:'+bg+';text-align:center;padding:5px 2px">'+cell+'</td>';
+  });
+  var zt=zoneTotal.tot?Math.round(zoneTotal.dn/zoneTotal.tot*100):0;
+  var ztBg=zt>=85?'#E1F5EE':zt>=60?'#FAEEDA':'#FCEBEB';
+  var ztC=zt>=85?'#0F6E56':zt>=60?'#854F0B':'#A32D2D';
+  tfoot+='<td style="background:#E6F1FB;text-align:center;padding:5px 8px">'
+    +'<span style="display:inline-block;font-size:11px;font-weight:800;padding:3px 8px;border-radius:8px;background:'+ztBg+';color:'+ztC+'">'+zt+'%</span></td>'
+    +'</tr>';
+  document.getElementById('tbl-zona-foot').innerHTML=tfoot;
 }
 
 /* ═══════════════ ANÁLISIS / GRÁFICOS ═══════════════ */

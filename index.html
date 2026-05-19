@@ -198,7 +198,7 @@ tfoot td:first-child{text-align:left;padding-left:12px;color:#042C53;font-size:1
   <div class="anl">
     <div class="atabs">
       <button class="atb on" onclick="setST(0)">% por tienda</button>
-      <button class="atb" onclick="setST(1)">Por responsable</button>
+      <button class="atb" onclick="setST(1)">Por área</button>
       <button class="atb" onclick="setST(2)">Por día</button>
       <button class="atb" onclick="setST(3)">Histórico</button>
     </div>
@@ -296,41 +296,47 @@ var AD=[0,1,2,3,4,5,6];
 
 /* ═══════════════ TAREAS ═══════════════ */
 var TASKS=[
-  {id:'t00',g:'Administrativo',gc:'gA',t:'Revisión de ausencias de personal',r:'Ambos',rc:'ra',d:[0,1,2,3,4,5,6]},
-  {id:'t09',g:'Administrativo',gc:'gA',t:'Revisión cierre de órdenes parciales',r:'Ambos',rc:'ra',d:[0,1,2,3,4,5,6]},
-  {id:'t01',g:'Comercial',gc:'gC',t:'Entrega plan de acción — Dinámicas comerciales',r:'Ambos',rc:'ra',d:[0,5]},
-  {id:'t02',g:'Comercial',gc:'gC',t:'Gestión agotados y excesos',r:'Comercial',rc:'rc',d:[0]},
-  {id:'t03',g:'Comercial',gc:'gC',t:'Gestión antigüedad por categoría',r:'Comercial',rc:'rc',d:[1]},
-  {id:'t04',g:'Comercial',gc:'gC',t:'Gestión de vencidos',r:'Comercial',rc:'rc',d:[1,3]},
-  {id:'t05',g:'Comercial',gc:'gC',t:'Gestión Venta Cero — bodega sin surtido',r:'Comercial',rc:'rc',d:[0,1,2,3,4,5,6]},
-  {id:'t06',g:'Comercial',gc:'gC',t:'Gestión y ajuste 1 a 5 unidades',r:'Comercial',rc:'rc',d:[3]},
-  {id:'t07',g:'Comercial',gc:'gC',t:'Gestión, depuración y organización bodega 03',r:'Comercial',rc:'rc',d:[0,1]},
-  {id:'t12',g:'Comercial',gc:'gC',t:'Plan de organización de bodegas',r:'Comercial',rc:'rc',d:[0,1,2,3,4]},
-  {id:'t28',g:'Comercial',gc:'gC',t:'Ingreso Facturas suministros',r:'Ambos',rc:'ra',d:[0,2,4]},
-  {id:'t29',g:'Comercial',gc:'gC',t:'Revisión de Campeones',r:'Ambos',rc:'ra',d:[1]},
-  {id:'t30',g:'Comercial',gc:'gC',t:'Bodega 02 y 04',r:'Ambos',rc:'ra',d:[0]},
-  {id:'t31',g:'Comercial',gc:'gC',t:'Revisar Rq Pendientes de Bodega',r:'Comercial',rc:'rc',d:[0,1,2,3,4]},
-  {id:'t10',g:'Principal',gc:'gP',t:'Revisión inventario transitorio (TST-TET-SDT-EDT)',r:'Principal',rc:'rp',d:[0,1,2,3,4,5,6]},
-  {id:'t11',g:'Principal',gc:'gP',t:'Revisión ítems fuera de portafolio',r:'Principal',rc:'rp',d:[0]},
-  {id:'t13',g:'Principal',gc:'gP',t:'Revisión cuenta exposición y negociaciones',r:'Principal',rc:'rp',d:[3]},
-  {id:'t14',g:'Principal',gc:'gP',t:'Revisión exhibiciones y lineales sin precio',r:'Principal',rc:'rp',d:[0,1,2,3,4,5,6]},
-  {id:'t15',g:'Principal',gc:'gP',t:'Revisión implementación Tipología MABCD',r:'Principal',rc:'rp',d:[0,1,2,3,4,5,6]},
-  {id:'t16',g:'Principal',gc:'gP',t:'Correo análisis de ventas (presupuesto / cómo vas)',r:'Principal',rc:'rp',d:[0]},
-  {id:'t17',g:'Principal',gc:'gP',t:'Actualización Link de Mantenimiento',r:'Principal',rc:'rp',d:[0,5]},
-  {id:'t18',g:'Principal',gc:'gP',t:'Revisión merma — reunión jueves',r:'Principal',rc:'rp',d:[3]},
-  {id:'t19',g:'Principal',gc:'gP',t:'Reunión FOCO',r:'Principal',rc:'rp',d:[0,3]},
-  {id:'t20',g:'Principal',gc:'gP',t:'Cumplimiento CNP',r:'Principal',rc:'rp',d:[0,1,2,3,4,5,6]},
-  {id:'t21',g:'Principal',gc:'gP',t:'Limpieza en góndolas (pegotes)',r:'Ambos',rc:'ra',d:[0,1,2,3,4,5,6]},
-  {id:'t08',g:'Caja',gc:'gJ',t:'Organización y aseo puntos de pago',r:'Sup caja',rc:'rx',d:[3,6]},
-  {id:'t22',g:'Coordinadores',gc:'gK',t:'Lavado carritos y canastillas',r:'Coordinadores',rc:'rk',d:[5,6]},
-  {id:'t23',g:'Coordinadores',gc:'gK',t:'Lavado cava de lácteos',r:'Coordinadores',rc:'rk',d:[1]},
-  {id:'t24',g:'Coordinadores',gc:'gK',t:'Lavado cavas Fruver y Carnes',r:'Coordinadores',rc:'rk',d:[1]},
-  {id:'t25',g:'Coordinadores',gc:'gK',t:'Lavado canastillas Fruver',r:'Coordinadores',rc:'rk',d:[3,6]},
-  {id:'t32',g:'Coordinadores',gc:'gK',t:'Lavado Cava de SAC',r:'Coordinadores',rc:'rk',d:[3]},
-  {id:'t26',g:'Coordinadores',gc:'gK',t:'Lavado a fondo horno de pollos',r:'Coordinadores',rc:'rk',d:[5,6]},
-  {id:'t27',g:'Coordinadores',gc:'gK',t:'Lavado a fondo recibo',r:'Coordinadores',rc:'rk',d:[6]}
+  /* ── VENTA ──────────────────────────────────────────────────── */
+  {id:'t00',g:'Venta',gc:'gA',t:'Revisión de ausencias de personal',r:'Ambos',rc:'ra',d:[0,1,2,3,4,5,6]},
+  {id:'t33',g:'Venta',gc:'gA',t:'Revision de tienda Aseo general',r:'Ambos',rc:'ra',d:[0,1,2,3,4,5,6]},
+  {id:'t34',g:'Venta',gc:'gA',t:'Implementacion correcta de dinamicas comercial vigente y ofertas',r:'Ambos',rc:'ra',d:[0,1,2,3,4,5,6]},
+  {id:'t35',g:'Venta',gc:'gA',t:'Revision general Surtido limpieza Frescos (Carnes-Fruver-Sac)',r:'Ambos',rc:'ra',d:[0,1,2,3,4,5,6]},
+  {id:'t14',g:'Venta',gc:'gA',t:'Revisión exhibiciones y lineales sin precio',r:'Principal',rc:'rp',d:[0,1,2,3,4,5,6]},
+  {id:'t08',g:'Venta',gc:'gA',t:'Organización y aseo puntos de pago',r:'Sup caja',rc:'rx',d:[0,1,2,3,4,5,6]},
+  {id:'t36',g:'Venta',gc:'gA',t:'Implementacion cajero Vendedor',r:'Ambos',rc:'ra',d:[0,1,2,3,4,5,6]},
+  {id:'t21',g:'Venta',gc:'gA',t:'Limpieza en góndolas (pegotes)',r:'Ambos',rc:'ra',d:[0,1,2,3,4,5,6]},
+  {id:'t02',g:'Venta',gc:'gA',t:'Gestión agotados y excesos',r:'Comercial',rc:'rc',d:[0,1,2,3,4,5,6]},
+  {id:'t29',g:'Venta',gc:'gA',t:'Revisión de Campeones',r:'Ambos',rc:'ra',d:[0,1,2,3,4,5,6]},
+  {id:'t01',g:'Venta',gc:'gA',t:'Entrega plan de acción — Dinámicas comerciales',r:'Ambos',rc:'ra',d:[0,1,2,3,4,5,6]},
+  {id:'t13',g:'Venta',gc:'gA',t:'Revisión cuenta exposición y negociaciones',r:'Principal',rc:'rp',d:[0,1,2,3,4,5,6]},
+  {id:'t15',g:'Venta',gc:'gA',t:'Revisión implementación Tipología MABCD',r:'Principal',rc:'rp',d:[0,1,2,3,4,5,6]},
+  {id:'t16',g:'Venta',gc:'gA',t:'Correo análisis de ventas (presupuesto / cómo vas)',r:'Principal',rc:'rp',d:[0,1,2,3,4,5,6]},
+  /* ── INVENTARIO ─────────────────────────────────────────────── */
+  {id:'t03',g:'Inventario',gc:'gC',t:'Gestión antigüedad por categoría',r:'Comercial',rc:'rc',d:[1]},
+  {id:'t04',g:'Inventario',gc:'gC',t:'Gestión de vencidos',r:'Comercial',rc:'rc',d:[1,3]},
+  {id:'t05',g:'Inventario',gc:'gC',t:'Gestión Venta Cero — bodega sin surtido',r:'Comercial',rc:'rc',d:[0,1,2,3,4,5,6]},
+  {id:'t06',g:'Inventario',gc:'gC',t:'Gestión y ajuste 1 a 5 unidades',r:'Comercial',rc:'rc',d:[0,3]},
+  {id:'t07',g:'Inventario',gc:'gC',t:'Gestión, depuración y organización bodega 03',r:'Comercial',rc:'rc',d:[0,1]},
+  {id:'t28',g:'Inventario',gc:'gC',t:'Ingreso Facturas suministros',r:'Ambos',rc:'ra',d:[0,2,4,6]},
+  {id:'t30',g:'Inventario',gc:'gC',t:'Bodega 02 y 04',r:'Ambos',rc:'ra',d:[0,1]},
+  {id:'t09',g:'Inventario',gc:'gC',t:'Revisión cierre de órdenes parciales',r:'Ambos',rc:'ra',d:[0,1,2,3,4,5]},
+  {id:'t10',g:'Inventario',gc:'gC',t:'Revisión inventario transitorio (TST-TET-SDT-EDT)',r:'Principal',rc:'rp',d:[0,1,2,3,4,5]},
+  {id:'t11',g:'Inventario',gc:'gC',t:'Revisión ítems fuera de portafolio',r:'Principal',rc:'rp',d:[0]},
+  {id:'t18',g:'Inventario',gc:'gC',t:'Revisión merma — reunión jueves',r:'Principal',rc:'rp',d:[3]},
+  /* ── GESTIÓN ────────────────────────────────────────────────── */
+  {id:'t19',g:'Gestión',gc:'gP',t:'Reunión Grupo Primario (FOCO)',r:'Principal',rc:'rp',d:[0,3]},
+  {id:'t17',g:'Gestión',gc:'gP',t:'Actualización Link de Mantenimiento',r:'Principal',rc:'rp',d:[0,2,4]},
+  /* ── ORDEN Y LIMPIEZA ───────────────────────────────────────── */
+  {id:'t12',g:'Orden y Limpieza',gc:'gK',t:'Plan de organización de bodegas',r:'Comercial',rc:'rc',d:[0,1,2,3,4]},
+  {id:'t22',g:'Orden y Limpieza',gc:'gK',t:'Lavado carritos y canastillas',r:'Coordinadores',rc:'rk',d:[5,6]},
+  {id:'t23',g:'Orden y Limpieza',gc:'gK',t:'Lavado cava de lácteos',r:'Coordinadores',rc:'rk',d:[1]},
+  {id:'t24',g:'Orden y Limpieza',gc:'gK',t:'Lavado cavas Fruver y Carnes',r:'Coordinadores',rc:'rk',d:[1]},
+  {id:'t25',g:'Orden y Limpieza',gc:'gK',t:'Lavado canastillas Fruver',r:'Coordinadores',rc:'rk',d:[3]},
+  {id:'t32',g:'Orden y Limpieza',gc:'gK',t:'Lavado Cava de SAC',r:'Coordinadores',rc:'rk',d:[3]},
+  {id:'t26',g:'Orden y Limpieza',gc:'gK',t:'Lavado a fondo horno de pollos',r:'Coordinadores',rc:'rk',d:[5,6]},
+  {id:'t27',g:'Orden y Limpieza',gc:'gK',t:'Lavado a fondo recibo',r:'Coordinadores',rc:'rk',d:[5,6]}
 ];
-var GROUPS=['Administrativo','Comercial','Principal','Caja','Coordinadores'];
+var GROUPS=['Venta','Inventario','Gestión','Orden y Limpieza'];
 
 /* ═══════════════ ESTADO ═══════════════ */
 var curZone='Atlántico',cur='UNICO',wkOff=0,checks={},obsData={},sTab=0,CHS={},pendingOps=0;
@@ -546,7 +552,7 @@ function render(){
 
   // Tabla desktop — cabecera
   var th=document.getElementById('dth');
-  if(th){var h='<tr><th class="tht">Tarea</th><th class="thr">Responsable</th>';
+  if(th){var h='<tr><th class="tht">Tarea</th>';
     AD.forEach(function(i){var dt=new Date(mon);dt.setDate(mon.getDate()+i);h+='<th class="'+(i===tdi?'thd-today':'')+'">'+DSS[i]+'<br>'+dt.getDate()+'</th>';});
     h+='<th class="thp">%</th></tr>';th.innerHTML=h;}
 
@@ -556,10 +562,10 @@ function render(){
     GROUPS.forEach(function(g){
       var gt=TASKS.filter(function(tk){return tk.g===g;});if(!gt.length)return;
       var gp=pct(cur,w,gt,AD);
-      h2+='<tr class="grow '+gt[0].gc+'"><td colspan="10"><span class="glbl">'+g+'</span>'+(gp!==null?'<span class="pill '+pc(gp)+'" style="margin-left:7px">'+gp+'%</span>':'')+'</td></tr>';
+      h2+='<tr class="grow '+gt[0].gc+'"><td colspan="9"><span class="glbl">'+g+'</span>'+(gp!==null?'<span class="pill '+pc(gp)+'" style="margin-left:7px">'+gp+'%</span>':'')+'</td></tr>';
       gt.forEach(function(tk){
         var rp=pct(cur,w,[tk],AD);
-        h2+='<tr><td class="tdt">'+esc(tk.t)+'</td><td class="tdr"><span class="bdg '+tk.rc+'">'+tk.r+'</span></td>';
+        h2+='<tr><td class="tdt">'+esc(tk.t)+'</td>';
         AD.forEach(function(di){
           var isTd=di===tdi,cls=isTd?' col-today':'';
           if(tk.d.indexOf(di)<0){h2+='<td class="tdd'+cls+'"></td>';return;}
@@ -574,7 +580,7 @@ function render(){
 
   // Tabla desktop — pie
   var tf=document.getElementById('dtf');
-  if(tf){var h3='<tr><td colspan="2">% por día</td>';
+  if(tf){var h3='<tr><td colspan="1">% por día</td>';
     AD.forEach(function(di){
       var isTd=di===tdi,inPast=tdi>=0&&di<tdi,dp=pct(cur,w,TASKS,[di]);
       h3+='<td class="'+(isTd?'col-today':'')+'">'+(dp!==null&&(inPast||isTd)?'<span class="pill '+pc(dp)+'">'+dp+'%</span>':'—')+'</td>';
@@ -727,11 +733,56 @@ function renderSum(){
     dCH('ch0');
     CHS['ch0']=new Chart(document.getElementById('ch0'),{type:'bar',data:{labels:stores.map(function(s){return s.length>10?s.substring(0,10)+'…':s;}),datasets:[{data:vals,backgroundColor:stores.map(function(s){return SCOL[s]||'#888';}),borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:function(v){return v+'%';},font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}},x:{grid:{display:false},ticks:{font:{size:9},maxRotation:35}}},plugins:{legend:{display:false}}}});
   } else if(sTab===1){
-    var resps=['Ambos','Comercial','Principal','Sup caja','Coordinadores'];
-    var vals2=resps.map(function(r){return pct(cur,w,TASKS.filter(function(tk){return tk.r===r;}),AD)||0;});
-    con.innerHTML='<div style="position:relative;height:185px"><canvas id="ch1"></canvas></div>';
+    /* POR ÁREA DE IMPACTO — promedio de la zona por grupo */
+    var AREA_COL={'Venta':'#185FA5','Inventario':'#854F0B','Gestión':'#534AB7','Orden y Limpieza':'#A32D2D'};
+    var AREA_ICON={'Venta':'🛒','Inventario':'📦','Gestión':'📊','Orden y Limpieza':'🧹'};
+    var areaData=GROUPS.map(function(g){
+      var areaTasks=TASKS.filter(function(tk){return tk.g===g;});
+      var tot=0,dn=0;
+      stores.forEach(function(s){
+        areaTasks.forEach(function(tk){
+          tk.d.forEach(function(di){
+            if(tdi>=0&&di>tdi) return;  /* solo días pasados+hoy */
+            tot++;if(done(s,w,tk.id,di))dn++;
+          });
+        });
+      });
+      return{g:g,p:tot?Math.round(dn/tot*100):0,dn:dn,tot:tot};
+    });
+
+    var cards=areaData.map(function(a){
+      var col=AREA_COL[a.g]||'#888';
+      var pCol=a.p>=85?'#1D9E75':a.p>=60?'#EF9F27':'#E24B4A';
+      return '<div style="background:#fff;border:0.5px solid #ddd;border-radius:10px;padding:10px 12px;border-top:4px solid '+col+';position:relative">'
+        +'<div style="font-size:18px;position:absolute;top:8px;right:10px;opacity:.25">'+(AREA_ICON[a.g]||'')+'</div>'
+        +'<div style="font-size:10px;font-weight:800;color:'+col+';margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">'+a.g+'</div>'
+        +'<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:5px">'
+        +'<span style="font-size:24px;font-weight:800;color:'+pCol+'">'+a.p+'%</span>'
+        +'<span style="font-size:10px;color:#888">'+a.dn+'/'+a.tot+'</span>'
+        +'</div>'
+        +'<div style="height:5px;border-radius:3px;background:#f0f0f0;overflow:hidden">'
+        +'<div style="height:100%;border-radius:3px;width:'+a.p+'%;background:'+pCol+'"></div></div>'
+        +'</div>';
+    }).join('');
+
+    con.innerHTML='<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px">'+cards+'</div>'
+      +'<div style="position:relative;height:185px"><canvas id="ch1"></canvas></div>';
     dCH('ch1');
-    CHS['ch1']=new Chart(document.getElementById('ch1'),{type:'bar',data:{labels:resps,datasets:[{data:vals2,backgroundColor:['#85B7EB','#FAC775','#AFA9EC','#9FE1CB','#F09595'],borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{min:0,max:100,ticks:{callback:function(v){return v+'%';},font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}},y:{grid:{display:false},ticks:{font:{size:11}}}},plugins:{legend:{display:false}}}});
+    CHS['ch1']=new Chart(document.getElementById('ch1'),{
+      type:'bar',
+      data:{
+        labels:areaData.map(function(a){return a.g;}),
+        datasets:[{
+          data:areaData.map(function(a){return a.p;}),
+          backgroundColor:areaData.map(function(a){return AREA_COL[a.g];}),
+          borderRadius:5,borderSkipped:false
+        }]
+      },
+      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+        scales:{x:{min:0,max:100,ticks:{callback:function(v){return v+'%';},font:{size:10}},grid:{color:'rgba(0,0,0,.05)'}},y:{grid:{display:false},ticks:{font:{size:11,weight:'bold'}}}},
+        plugins:{legend:{display:false}}
+      }
+    });
   } else if(sTab===2){
     var vals3=AD.map(function(di){return(tdi>=0&&di<=tdi)?(pct(cur,w,TASKS,[di])||0):null;});
     var bgs=vals3.map(function(v){return v===null?'rgba(12,68,124,.1)':v>=85?'#1D9E75':v>=60?'#EF9F27':'#E24B4A';});
@@ -764,11 +815,11 @@ function startReminderLoop(){setInterval(function(){if(Date.now()>=nextRemTime)t
 function resetWk(){if(!confirm('¿Limpiar registros de esta semana para '+cur+'?'))return;var pfx=cur+'|'+wkKey()+'|';Object.keys(checks).forEach(function(k){if(k.indexOf(pfx)===0)delete checks[k];});sbReset(cur,wkKey());render();}
 function doExport(){
   var w=wkKey();
-  var rows=[['Zona','Tienda','Grupo','Tarea','Responsable'].concat(DSS).concat(['%']).join(',')];
+  var rows=[['Zona','Tienda','Grupo','Tarea'].concat(DSS).concat(['%']).join(',')];
   TASKS.forEach(function(tk){
     var days=AD.map(function(i){return tk.d.indexOf(i)>=0?(done(cur,w,tk.id,i)?'OK':'Pendiente'):'N/A';});
     var p2=pct(cur,w,[tk],AD);
-    rows.push([curZone,cur,'"'+tk.g+'"','"'+tk.t+'"',tk.r].concat(days).concat([p2!==null?p2+'%':'—']).join(','));
+    rows.push([curZone,cur,'"'+tk.g+'"','"'+tk.t+'"'].concat(days).concat([p2!==null?p2+'%':'—']).join(','));
   });
   var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8;'}));a.download='seguimiento-'+curZone+'-'+cur+'-'+wkKey()+'.csv';a.click();
 }
